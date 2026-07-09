@@ -1,14 +1,9 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import DocsMarkdown from './DocsMarkdown'
 import DocsSidebar from './DocsSidebar'
 import DocsTryIt from './DocsTryIt'
-import Footer from './Footer'
-import WelcomeHeader from './WelcomeHeader'
 import { DocsPage, DOCS_NAV, DOCS_PAGES } from '../utils/docsData'
-import { Language, getLanguageFromStorage, translations } from '../utils/language'
-import { useWelcomeHeaderPin } from '../utils/useWelcomeHeaderPin'
 
 type DocsLayoutProps = {
   page: DocsPage
@@ -41,18 +36,8 @@ function EndpointBar({ page }: { page: DocsPage }) {
 }
 
 export default function DocsLayout({ page }: DocsLayoutProps) {
-  const [language, setLanguage] = useState<Language>('en')
-  const isHeaderPinned = useWelcomeHeaderPin()
   const { prev, next } = getAdjacentPages(page.slug)
   const isApiRef = Boolean(page.method || page.endpoint)
-
-  useEffect(() => {
-    setLanguage(getLanguageFromStorage())
-  }, [])
-
-  const t = (key: keyof typeof translations.en): string => {
-    return translations[language][key] || translations.en[key] || key
-  }
 
   return (
     <>
@@ -70,16 +55,6 @@ export default function DocsLayout({ page }: DocsLayoutProps) {
       </Head>
 
       <div className="docs-page">
-        <WelcomeHeader
-          isPinned={isHeaderPinned}
-          payNowLabel={t('payNow')}
-          getStartedLabel={t('getStarted')}
-        />
-        <div
-          className={`welcome-hero-header-spacer${isHeaderPinned ? ' is-active' : ''}`}
-          aria-hidden="true"
-        />
-
         <main className="docs-main">
           <div className={`docs-shell${isApiRef ? ' is-api-ref' : ''}`}>
             <DocsSidebar activeSlug={page.slug} />
@@ -147,8 +122,6 @@ export default function DocsLayout({ page }: DocsLayoutProps) {
             </article>
           </div>
         </main>
-
-        <Footer language={language} />
       </div>
     </>
   )

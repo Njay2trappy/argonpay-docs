@@ -1559,11 +1559,11 @@ body{
 
 .docs-sidebar {
   position: sticky;
-  top: 96px;
+  top: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 48px);
   overflow-y: auto;
   padding-right: 8px;
   scrollbar-width: thin;
@@ -2050,7 +2050,7 @@ body{
 
 .docs-examples {
   position: sticky;
-  top: 96px;
+  top: 24px;
   min-width: 0;
 }
 
