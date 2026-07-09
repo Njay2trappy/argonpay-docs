@@ -1,6 +1,6 @@
 # Argonpay merchant API
 
-Argonpay is a multi-chain crypto payment API for merchants. This documentation covers **API key authenticated** GraphQL operations and the matching merchant REST endpoint from Argonpay v2.
+Argonpay is a multi-chain crypto payment API for merchants. This documentation covers merchant GraphQL operations and REST helpers from Argonpay v2.
 
 ## Base URL
 
@@ -20,24 +20,28 @@ Stable tokens: `USDT`, `USDC` (where supported by the payment start flow).
 
 ## Authentication
 
-Merchant operations authenticate by passing your **`apiKey` as a GraphQL argument** (or in the REST JSON body for `POST /create-payment`). There is no `x-api-key` header.
+API-key operations pass **`apiKey` as a GraphQL argument** (or in the REST body for `POST /create-payment`). There is no `x-api-key` header.
 
-Most authenticated reads and writes debit **1 query** from `queriesLeft`. Exceptions:
+Checkout helpers such as `start*Payment`, `cancelPayment`, and `getTxnDetails` use **`txnid`** (from `payment`) instead of an `apiKey` argument. Starting a payment still debits **1 query** from the transaction owner's key.
 
 | Operation | Debits query? |
 | --- | --- |
 | `getQueriesLeft` | No |
-| `payment` | No (debit happens when a payment is started on-chain) |
+| `payment` | No (debit on payment start) |
 | `rechargeApiKey` | No (adds queries) |
-| Other API-key operations in this docs set | Yes |
+| `startBSCPayment` / `startPolygonPayment` / `startBasePayment` / `startSOLPayment` | Yes (owner key) |
+| Other API-key operations | Yes |
 
 ## Transaction statuses
 
 `PENDING` · `STARTED` · `COMPLETED` · `EXPIRED` · `CANCELLED`
 
-## What this docs site covers
+## Typical payment flow
 
-Only merchant **API key** GraphQL queries/mutations and `POST /create-payment`.
+1. `payment` (or `POST /create-payment`) → get `txnid` + `paymentLink`
+2. `startBSCPayment` / `startPolygonPayment` / `startBasePayment` / `startSOLPayment` → deposit address
+3. Poll `getTxnDetails` (or `getTransactionDetails` with API key)
+4. Optionally `cancelPayment` if still pending/started
 
-Not documented here: subscriptions, superKey/admin tools, public/guest payment flows, or txnid-only payment start endpoints used by the hosted checkout.
+Not documented here: subscriptions, superKey/admin tools, or public/guest payment flows.
 

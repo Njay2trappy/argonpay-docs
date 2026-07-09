@@ -384,6 +384,180 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
     ],
     defaults: { apiKey: '', network: 'POLYGON' },
   },
+  'get-txn-details': {
+    kind: 'graphql',
+    operationName: 'GetTxnDetails',
+    query: `query GetTxnDetails($txnid: String!) {
+  getTxnDetails(txnid: $txnid) {
+    code
+    message
+    transaction {
+      txnid
+      amount
+      amountInToken
+      token
+      network
+      status
+      wallet { address }
+      countdown
+      hash
+      blockchainLink
+      isExpired
+      expiresAt
+      createdAt
+    }
+  }
+}`,
+    fields: [
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+    ],
+    defaults: { txnid: '' },
+  },
+  'start-bsc-payment': {
+    kind: 'graphql',
+    operationName: 'StartBSCPayment',
+    query: `mutation StartBSCPayment($txnid: String!, $token: StableToken) {
+  startBSCPayment(txnid: $txnid, token: $token) {
+    code
+    message
+    transaction {
+      txnid
+      amount
+      amountInToken
+      token
+      network
+      status
+      wallet { address }
+      countdown
+      expiresAt
+      createdAt
+    }
+  }
+}`,
+    fields: [
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+      {
+        key: 'token',
+        label: 'Token',
+        type: 'string',
+        placeholder: 'USDT',
+        help: 'USDT | USDC',
+      },
+    ],
+    defaults: { txnid: '', token: 'USDT' },
+  },
+  'start-polygon-payment': {
+    kind: 'graphql',
+    operationName: 'StartPolygonPayment',
+    query: `mutation StartPolygonPayment($txnid: String!, $token: StableToken) {
+  startPolygonPayment(txnid: $txnid, token: $token) {
+    code
+    message
+    transaction {
+      txnid
+      amount
+      amountInToken
+      token
+      network
+      status
+      wallet { address }
+      countdown
+      expiresAt
+      createdAt
+    }
+  }
+}`,
+    fields: [
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+      {
+        key: 'token',
+        label: 'Token',
+        type: 'string',
+        placeholder: 'USDT',
+        help: 'USDT | USDC',
+      },
+    ],
+    defaults: { txnid: '', token: 'USDT' },
+  },
+  'start-base-payment': {
+    kind: 'graphql',
+    operationName: 'StartBasePayment',
+    query: `mutation StartBasePayment($txnid: String!, $token: StableToken) {
+  startBasePayment(txnid: $txnid, token: $token) {
+    code
+    message
+    transaction {
+      txnid
+      amount
+      amountInToken
+      token
+      network
+      status
+      wallet { address }
+      countdown
+      expiresAt
+      createdAt
+    }
+  }
+}`,
+    fields: [
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+      {
+        key: 'token',
+        label: 'Token',
+        type: 'string',
+        placeholder: 'USDT',
+        help: 'USDT | USDC',
+      },
+    ],
+    defaults: { txnid: '', token: 'USDT' },
+  },
+  'start-sol-payment': {
+    kind: 'graphql',
+    operationName: 'StartSOLPayment',
+    query: `mutation StartSOLPayment($txnid: String!) {
+  startSOLPayment(txnid: $txnid) {
+    code
+    message
+    transaction {
+      txnid
+      amount
+      amountInToken
+      network
+      status
+      wallet { address }
+      countdown
+      expiresAt
+      createdAt
+    }
+  }
+}`,
+    fields: [
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+    ],
+    defaults: { txnid: '' },
+  },
+  'cancel-payment': {
+    kind: 'graphql',
+    operationName: 'CancelPayment',
+    query: `mutation CancelPayment($txnid: String!) {
+  cancelPayment(txnid: $txnid) {
+    code
+    message
+    transaction {
+      txnid
+      amount
+      status
+      network
+      createdAt
+    }
+  }
+}`,
+    fields: [
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+    ],
+    defaults: { txnid: '' },
+  },
 }
 
 export function getDocsTryConfig(slug: string): DocsTryConfig | undefined {
