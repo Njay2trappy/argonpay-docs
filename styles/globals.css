@@ -1713,11 +1713,20 @@ body{
   border-color: #fecaca;
 }
 
+.docs-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  width: 100%;
+}
+
 .docs-title {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
+  margin: 0;
 }
 
 .docs-title .docs-method-badge {
@@ -2105,17 +2114,13 @@ body{
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-top: 18px;
 }
 
 .docs-try-fab {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 5;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex: 0 0 auto;
   padding: 10px 16px;
   border: none;
   border-radius: 999px;
@@ -2127,15 +2132,14 @@ body{
   letter-spacing: -0.01em;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(24, 201, 100, 0.35);
-  transform: translate(-12px, -12px);
+  box-shadow: 0 8px 24px rgba(24, 201, 100, 0.28);
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .docs-try-fab:hover {
   background: #12b85a;
-  transform: translate(-12px, -14px);
-  box-shadow: 0 10px 28px rgba(24, 201, 100, 0.42);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(24, 201, 100, 0.36);
 }
 
 .docs-sample-card {

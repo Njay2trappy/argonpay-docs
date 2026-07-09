@@ -1,10 +1,12 @@
 import Head from 'next/head'
 import Link from 'next/link'
+import { useState } from 'react'
 import DocsApiSamples from './DocsApiSamples'
 import DocsBrandHeader from './DocsBrandHeader'
 import DocsMarkdown from './DocsMarkdown'
 import DocsSidebar from './DocsSidebar'
 import { DocsPage, DOCS_NAV, DOCS_PAGES } from '../utils/docsData'
+import { getDocsTryConfig } from '../utils/docsTryIt'
 
 type DocsLayoutProps = {
   page: DocsPage
@@ -39,6 +41,8 @@ function EndpointBar({ page }: { page: DocsPage }) {
 export default function DocsLayout({ page }: DocsLayoutProps) {
   const { prev, next } = getAdjacentPages(page.slug)
   const isApiRef = Boolean(page.method || page.endpoint)
+  const canTry = Boolean(getDocsTryConfig(page.slug))
+  const [tryOpen, setTryOpen] = useState(false)
 
   return (
     <>
@@ -65,9 +69,23 @@ export default function DocsLayout({ page }: DocsLayoutProps) {
             <article className="docs-panel">
               <header className="docs-head">
                 <p className="docs-eyebrow">API Reference</p>
-                <h1 className="docs-title">
-                  <span>{page.title}</span>
-                </h1>
+                <div className="docs-title-row">
+                  <h1 className="docs-title">
+                    <span>{page.title}</span>
+                  </h1>
+                  {canTry ? (
+                    <button
+                      type="button"
+                      className="docs-try-fab"
+                      onClick={() => setTryOpen(true)}
+                    >
+                      <span>Try it</span>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        <path d="M3 1.5L10 6L3 10.5V1.5Z" fill="currentColor" />
+                      </svg>
+                    </button>
+                  ) : null}
+                </div>
                 {page.summary ? <p className="docs-summary">{page.summary}</p> : null}
                 <EndpointBar page={page} />
               </header>
@@ -114,16 +132,31 @@ export default function DocsLayout({ page }: DocsLayoutProps) {
                   </nav>
                 </div>
 
-                {isApiRef ? (
-                  <aside className="docs-examples" aria-label="Request examples">
+                {canTry ? (
+                  isApiRef ? (
+                    <aside className="docs-examples" aria-label="Request examples">
+                      <DocsApiSamples
+                        slug={page.slug}
+                        title={page.title}
+                        endpoint={page.endpoint}
+                        method={page.method}
+                        operation={page.operation}
+                        overlayOpen={tryOpen}
+                        onOverlayOpenChange={setTryOpen}
+                      />
+                    </aside>
+                  ) : (
                     <DocsApiSamples
                       slug={page.slug}
                       title={page.title}
                       endpoint={page.endpoint}
                       method={page.method}
                       operation={page.operation}
+                      showSamples={false}
+                      overlayOpen={tryOpen}
+                      onOverlayOpenChange={setTryOpen}
                     />
-                  </aside>
+                  )
                 ) : null}
               </div>
             </article>

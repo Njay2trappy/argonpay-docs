@@ -13,6 +13,9 @@ type DocsApiSamplesProps = {
   endpoint?: string
   method?: string
   operation?: string
+  showSamples?: boolean
+  overlayOpen?: boolean
+  onOverlayOpenChange?: (open: boolean) => void
 }
 
 type SampleLang = 'curl' | 'javascript' | 'python' | 'graphql'
@@ -217,12 +220,20 @@ export default function DocsApiSamples({
   endpoint,
   method,
   operation,
+  showSamples = true,
+  overlayOpen: overlayOpenProp,
+  onOverlayOpenChange,
 }: DocsApiSamplesProps) {
   const config = useMemo(() => getDocsTryConfig(slug), [slug])
   const [lang, setLang] = useState<SampleLang>('curl')
   const [langOpen, setLangOpen] = useState(false)
   const [status, setStatus] = useState<(typeof RESPONSE_STATUSES)[number]>('200')
-  const [overlayOpen, setOverlayOpen] = useState(false)
+  const [overlayOpenInternal, setOverlayOpenInternal] = useState(false)
+  const overlayOpen = overlayOpenProp ?? overlayOpenInternal
+  const setOverlayOpen = (open: boolean) => {
+    onOverlayOpenChange?.(open)
+    if (overlayOpenProp === undefined) setOverlayOpenInternal(open)
+  }
   const [values, setValues] = useState<Record<string, string>>({})
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<TryResponse | null>(null)
@@ -327,148 +338,141 @@ export default function DocsApiSamples({
 
   return (
     <div className="docs-samples">
-      <button
-        type="button"
-        className="docs-try-fab"
-        onClick={() => setOverlayOpen(true)}
-      >
-        <span>Try it</span>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <path d="M3 1.5L10 6L3 10.5V1.5Z" fill="currentColor" />
-        </svg>
-      </button>
-
-      <section className="docs-sample-card" aria-label="Request sample">
-        <div className="docs-sample-card-head">
-          <h2 className="docs-sample-card-title">{title}</h2>
-          <div className="docs-sample-card-actions">
-            <div className="docs-lang-select" onClick={(event) => event.stopPropagation()}>
-              <button
-                type="button"
-                className="docs-lang-trigger"
-                aria-haspopup="listbox"
-                aria-expanded={langOpen}
-                onClick={() => setLangOpen((open) => !open)}
-              >
-                <span>{activeLang.label}</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                  <path
-                    d="M3 4.5L6 7.5L9 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              {langOpen ? (
-                <div className="docs-lang-menu" role="listbox">
-                  {LANG_OPTIONS.map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      role="option"
-                      aria-selected={option.id === lang}
-                      className={`docs-lang-option${option.id === lang ? ' is-active' : ''}`}
-                      onClick={() => {
-                        setLang(option.id)
-                        setLangOpen(false)
-                      }}
-                    >
-                      <span>{option.label}</span>
-                      {option.id === lang ? <span className="docs-lang-check">✓</span> : null}
-                    </button>
-                  ))}
+      {showSamples ? (
+        <>
+          <section className="docs-sample-card" aria-label="Request sample">
+            <div className="docs-sample-card-head">
+              <h2 className="docs-sample-card-title">{title}</h2>
+              <div className="docs-sample-card-actions">
+                <div className="docs-lang-select" onClick={(event) => event.stopPropagation()}>
+                  <button
+                    type="button"
+                    className="docs-lang-trigger"
+                    aria-haspopup="listbox"
+                    aria-expanded={langOpen}
+                    onClick={() => setLangOpen((open) => !open)}
+                  >
+                    <span>{activeLang.label}</span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path
+                        d="M3 4.5L6 7.5L9 4.5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  {langOpen ? (
+                    <div className="docs-lang-menu" role="listbox">
+                      {LANG_OPTIONS.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          role="option"
+                          aria-selected={option.id === lang}
+                          className={`docs-lang-option${option.id === lang ? ' is-active' : ''}`}
+                          onClick={() => {
+                            setLang(option.id)
+                            setLangOpen(false)
+                          }}
+                        >
+                          <span>{option.label}</span>
+                          {option.id === lang ? <span className="docs-lang-check">✓</span> : null}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
+                <button
+                  type="button"
+                  className="docs-copy-btn"
+                  aria-label={copied === 'request' ? 'Copied' : 'Copy request'}
+                  onClick={() => copyText(samples[lang], 'request')}
+                >
+                  {copied === 'request' ? (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path
+                        d="M3 7.5L5.5 10L11 4"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <rect x="5" y="5" width="7" height="7" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
+                      <path
+                        d="M9 5V3.8A1.8 1.8 0 0 0 7.2 2H3.8A1.8 1.8 0 0 0 2 3.8v3.4A1.8 1.8 0 0 0 3.8 9H5"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              className="docs-copy-btn"
-              aria-label={copied === 'request' ? 'Copied' : 'Copy request'}
-              onClick={() => copyText(samples[lang], 'request')}
-            >
-              {copied === 'request' ? (
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                  <path
-                    d="M3 7.5L5.5 10L11 4"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                  <rect x="5" y="5" width="7" height="7" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
-                  <path
-                    d="M9 5V3.8A1.8 1.8 0 0 0 7.2 2H3.8A1.8 1.8 0 0 0 2 3.8v3.4A1.8 1.8 0 0 0 3.8 9H5"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-        <DocsCodeBlock
-          language={lang === 'curl' ? 'bash' : lang}
-          code={samples[lang]}
-          showToolbar={false}
-        />
-      </section>
+            <DocsCodeBlock
+              language={lang === 'curl' ? 'bash' : lang}
+              code={samples[lang]}
+              showToolbar={false}
+            />
+          </section>
 
-      <section className="docs-sample-card" aria-label="Response sample">
-        <div className="docs-sample-card-head is-response">
-          <div className="docs-status-tabs" role="tablist" aria-label="Response status">
-            {RESPONSE_STATUSES.map((code) => (
+          <section className="docs-sample-card" aria-label="Response sample">
+            <div className="docs-sample-card-head is-response">
+              <div className="docs-status-tabs" role="tablist" aria-label="Response status">
+                {RESPONSE_STATUSES.map((code) => (
+                  <button
+                    key={code}
+                    type="button"
+                    role="tab"
+                    aria-selected={status === code}
+                    className={`docs-status-tab${status === code ? ' is-active' : ''}`}
+                    onClick={() => setStatus(code)}
+                  >
+                    {code}
+                  </button>
+                ))}
+              </div>
               <button
-                key={code}
                 type="button"
-                role="tab"
-                aria-selected={status === code}
-                className={`docs-status-tab${status === code ? ' is-active' : ''}`}
-                onClick={() => setStatus(code)}
+                className="docs-copy-btn"
+                aria-label={copied === 'response' ? 'Copied' : 'Copy response'}
+                onClick={() => copyText(responses[status], 'response')}
               >
-                {code}
+                {copied === 'response' ? (
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path
+                      d="M3 7.5L5.5 10L11 4"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <rect x="5" y="5" width="7" height="7" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
+                    <path
+                      d="M9 5V3.8A1.8 1.8 0 0 0 7.2 2H3.8A1.8 1.8 0 0 0 2 3.8v3.4A1.8 1.8 0 0 0 3.8 9H5"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                    />
+                  </svg>
+                )}
               </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="docs-copy-btn"
-            aria-label={copied === 'response' ? 'Copied' : 'Copy response'}
-            onClick={() => copyText(responses[status], 'response')}
-          >
-            {copied === 'response' ? (
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path
-                  d="M3 7.5L5.5 10L11 4"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            ) : (
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <rect x="5" y="5" width="7" height="7" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
-                <path
-                  d="M9 5V3.8A1.8 1.8 0 0 0 7.2 2H3.8A1.8 1.8 0 0 0 2 3.8v3.4A1.8 1.8 0 0 0 3.8 9H5"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
-        <DocsCodeBlock language="json" code={responses[status]} showToolbar={false} />
-      </section>
+            </div>
+            <DocsCodeBlock language="json" code={responses[status]} showToolbar={false} />
+          </section>
 
-      {method || endpoint ? (
-        <p className="docs-sample-meta">
-          {method || 'POST'} · {endpoint || 'https://api.argonpay.app/graphql'}
-        </p>
+          {method || endpoint ? (
+            <p className="docs-sample-meta">
+              {method || 'POST'} · {endpoint || 'https://api.argonpay.app/graphql'}
+            </p>
+          ) : null}
+        </>
       ) : null}
 
       {overlayOpen ? (
