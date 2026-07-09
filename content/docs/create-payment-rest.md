@@ -1,4 +1,4 @@
-# REST create payment
+# Create payment
 
 > REST equivalent of the GraphQL payment mutation.
 

@@ -42,5 +42,5 @@ mutation CancelPayment($txnid: String!) {
 
 ## REST equivalent
 
-See [REST cancel payment](/cancel-payment-rest) (`POST /cancel-payment`).
+See [Cancel payment](/cancel-payment-rest) (`POST /cancel-payment`).
 

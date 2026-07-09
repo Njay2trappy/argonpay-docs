@@ -48,5 +48,5 @@ mutation StartSOLPayment($txnid: String!) {
 
 ## REST equivalent
 
-See [REST start payment](/pay-rest) (`POST /pay` with `network: "sol"`).
+See [Start payment](/pay-rest) (`POST /pay` with `network: "sol"`).
 

@@ -1,4 +1,4 @@
-# REST get order
+# Get order
 
 > REST equivalent of the GraphQL getTxnDetails query.
 

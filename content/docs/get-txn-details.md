@@ -52,5 +52,5 @@ query GetTxnDetails($txnid: String!) {
 
 ## REST equivalent
 
-See [REST get order](/get-order-rest) (`GET /orders/:txnid`).
+See [Get order](/get-order-rest) (`GET /orders/:txnid`).
 

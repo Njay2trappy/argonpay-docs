@@ -1,3 +1,4 @@
+import DocsThemeToggle from './DocsThemeToggle'
 import { mainSitePath } from '../utils/site'
 
 export default function DocsBrandHeader() {
@@ -8,6 +9,7 @@ export default function DocsBrandHeader() {
           <img src="/assets/argon-logo.png" alt="" className="docs-brand-logo" />
           <span className="docs-brand-name">Argon</span>
         </a>
+        <DocsThemeToggle />
       </div>
     </header>
   )

@@ -1,5 +1,7 @@
 import { Highlight, themes, type Language } from 'prism-react-renderer'
 import { useMemo, useState } from 'react'
+import DocsLangIcon from './DocsLangIcon'
+import { useTheme } from '../utils/theme'
 
 export type DocsCodeSnippet = {
   language: string
@@ -25,6 +27,9 @@ const LANGUAGE_ALIASES: Record<string, Language> = {
   python: 'python',
   gql: 'graphql',
   graphql: 'graphql',
+  rust: 'rust',
+  go: 'go',
+  golang: 'go',
   json: 'json',
   bash: 'markup',
   sh: 'markup',
@@ -41,6 +46,9 @@ const LANGUAGE_LABELS: Record<string, string> = {
   typescript: 'TypeScript',
   python: 'Python',
   graphql: 'GraphQL',
+  rust: 'Rust',
+  go: 'Go',
+  golang: 'Go',
   json: 'JSON',
   bash: 'Shell',
   nginx: 'HTTP',
@@ -49,11 +57,11 @@ const LANGUAGE_LABELS: Record<string, string> = {
   markup: 'Markup',
 }
 
-const argonCodeTheme = {
+const argonLightCodeTheme = {
   ...themes.github,
   plain: {
     color: '#1f1f1f',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
   },
   styles: [
     ...themes.github.styles,
@@ -96,6 +104,53 @@ const argonCodeTheme = {
   ],
 }
 
+const argonDarkCodeTheme = {
+  ...themes.vsDark,
+  plain: {
+    color: '#e8e8e8',
+    backgroundColor: 'transparent',
+  },
+  styles: [
+    ...themes.vsDark.styles,
+    {
+      types: ['comment', 'prolog', 'doctype', 'cdata'],
+      style: { color: '#8b949e', fontStyle: 'italic' as const },
+    },
+    {
+      types: ['punctuation'],
+      style: { color: '#a0a0a0' },
+    },
+    {
+      types: ['property', 'tag', 'attr-name'],
+      style: { color: '#7ee787' },
+    },
+    {
+      types: ['boolean', 'number', 'constant', 'symbol', 'null'],
+      style: { color: '#79c0ff' },
+    },
+    {
+      types: ['selector', 'string', 'char', 'builtin', 'inserted'],
+      style: { color: '#a5d6ff' },
+    },
+    {
+      types: ['operator', 'entity', 'url'],
+      style: { color: '#ffd700' },
+    },
+    {
+      types: ['atrule', 'attr-value', 'keyword'],
+      style: { color: '#ff7b72' },
+    },
+    {
+      types: ['function', 'class-name'],
+      style: { color: '#d2a8ff' },
+    },
+    {
+      types: ['regex', 'important', 'variable'],
+      style: { color: '#ffa198' },
+    },
+  ],
+}
+
 function normalizeLanguage(language?: string): string {
   if (!language) return 'text'
   return language.trim().toLowerCase()
@@ -113,18 +168,39 @@ function languageLabel(language?: string): string {
   return normalized.toUpperCase()
 }
 
+function MacWindowControls() {
+  return (
+    <div className="docs-code-traffic" aria-hidden="true">
+      <span className="docs-code-dot is-close" />
+      <span className="docs-code-dot is-minimize" />
+      <span className="docs-code-dot is-maximize" />
+    </div>
+  )
+}
+
 export function DocsCodeBlock({ language, code, showToolbar = true }: DocsCodeBlockProps) {
+  const { resolved } = useTheme()
   const prismLanguage = resolvePrismLanguage(language)
   const label = languageLabel(language)
+  const codeTheme = resolved === 'dark' ? argonDarkCodeTheme : argonLightCodeTheme
 
   return (
     <div className="docs-code" data-language={normalizeLanguage(language)}>
-      {showToolbar ? (
-        <div className="docs-code-toolbar">
-          <span className="docs-code-lang">{label}</span>
-        </div>
-      ) : null}
-      <Highlight theme={argonCodeTheme} code={code.replace(/\n$/, '')} language={prismLanguage}>
+      <div className="docs-code-toolbar">
+        <MacWindowControls />
+        {showToolbar ? (
+          <span className="docs-code-lang">
+            <DocsLangIcon language={language || 'text'} size={12} />
+            <span>{label}</span>
+          </span>
+        ) : (
+          <span className="docs-code-lang is-plain">
+            <span>{label}</span>
+          </span>
+        )}
+        <span className="docs-code-toolbar-spacer" aria-hidden="true" />
+      </div>
+      <Highlight theme={codeTheme} code={code.replace(/\n$/, '')} language={prismLanguage}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
           <pre className={`docs-code-pre ${className}`} style={style}>
             <code className="docs-code-code">
@@ -144,6 +220,8 @@ export function DocsCodeBlock({ language, code, showToolbar = true }: DocsCodeBl
 }
 
 export function DocsCodeTabs({ snippets }: DocsCodeTabsProps) {
+  const { resolved } = useTheme()
+  const codeTheme = resolved === 'dark' ? argonDarkCodeTheme : argonLightCodeTheme
   const tabs = useMemo(
     () =>
       snippets.map((snippet) => ({
@@ -166,6 +244,7 @@ export function DocsCodeTabs({ snippets }: DocsCodeTabsProps) {
   return (
     <div className="docs-code docs-code-tabs" data-language={active.key}>
       <div className="docs-code-toolbar">
+        <MacWindowControls />
         <div className="docs-code-tablist" role="tablist" aria-label="Code language">
           {tabs.map((tab) => {
             const isActive = tab.key === active.key
@@ -178,14 +257,16 @@ export function DocsCodeTabs({ snippets }: DocsCodeTabsProps) {
                 className={`docs-code-tab${isActive ? ' is-active' : ''}`}
                 onClick={() => setActiveKey(tab.key)}
               >
-                {tab.label}
+                <DocsLangIcon language={tab.key} size={12} />
+                <span>{tab.label}</span>
               </button>
             )
           })}
         </div>
+        <span className="docs-code-toolbar-spacer" aria-hidden="true" />
       </div>
       <Highlight
-        theme={argonCodeTheme}
+        theme={codeTheme}
         code={active.code.replace(/\n$/, '')}
         language={resolvePrismLanguage(active.language)}
       >

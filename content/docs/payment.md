@@ -68,4 +68,4 @@ Redirect your customer to `paymentLink` to complete network selection and deposi
 
 ## REST equivalent
 
-See [REST create payment](/create-payment-rest) (`POST /create-payment`).
+See [Create payment](/create-payment-rest) (`POST /create-payment`).

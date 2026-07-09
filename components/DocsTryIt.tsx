@@ -1,4 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
+import DocsResponseFields from './DocsResponseFields'
+import DocsTryFieldInput from './DocsTryField'
 import {
   DocsTryConfig,
   DocsTryField,
@@ -174,22 +176,17 @@ export default function DocsTryIt({ slug, title, compact = false }: DocsTryItPro
         <form className="docs-try-body" onSubmit={handleSubmit}>
           <div className={`docs-try-grid${compact ? ' is-stack' : ''}`}>
             <div className="docs-try-fields">
+              <div className="docs-schema-head is-inline">
+                <h3 className="docs-schema-title">Request inputs</h3>
+                <p className="docs-schema-copy">Each field shows its API value type.</p>
+              </div>
               {config.fields.map((field) => (
-                <label key={field.key} className="docs-try-field">
-                  <span>
-                    {field.label}
-                    {field.required ? <em>*</em> : null}
-                  </span>
-                  <input
-                    type={field.type === 'password' ? 'password' : field.type === 'number' ? 'number' : 'text'}
-                    value={values[field.key] ?? ''}
-                    placeholder={field.placeholder}
-                    onChange={(event) => handleChange(field.key, event.target.value)}
-                    autoComplete="off"
-                    spellCheck={false}
-                  />
-                  {field.help ? <small>{field.help}</small> : null}
-                </label>
+                <DocsTryFieldInput
+                  key={field.key}
+                  field={field}
+                  value={values[field.key] ?? ''}
+                  onChange={(value) => handleChange(field.key, value)}
+                />
               ))}
 
               <div className="docs-try-actions">
@@ -229,6 +226,7 @@ export default function DocsTryIt({ slug, title, compact = false }: DocsTryItPro
                       : 'Fill the fields and click Send request to see the live API response here.')}
                 </code>
               </pre>
+              <DocsResponseFields fields={config.responseFields} />
             </div>
           </div>
         </form>

@@ -1,4 +1,4 @@
-# REST cancel payment
+# Cancel payment
 
 > REST equivalent of the GraphQL cancelPayment mutation.
 

@@ -51,5 +51,5 @@ mutation StartBasePayment($txnid: String!, $token: StableToken) {
 
 ## REST equivalent
 
-See [REST start payment](/pay-rest) (`POST /pay` with `network: "base"`).
+See [Start payment](/pay-rest) (`POST /pay` with `network: "base"`).
 

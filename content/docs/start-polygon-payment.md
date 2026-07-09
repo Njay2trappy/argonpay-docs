@@ -51,5 +51,5 @@ mutation StartPolygonPayment($txnid: String!, $token: StableToken) {
 
 ## REST equivalent
 
-See [REST start payment](/pay-rest) (`POST /pay` with `network: "polygon"`).
+See [Start payment](/pay-rest) (`POST /pay` with `network: "polygon"`).
 

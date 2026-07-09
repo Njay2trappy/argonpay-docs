@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createElement, Fragment, ReactNode } from 'react'
 import { DocsCodeBlock, DocsCodeSnippet, DocsCodeTabs } from './DocsCodeBlock'
+import { classifyFieldGroup } from '../utils/docsFieldGroups'
 
 type DocsMarkdownProps = {
   content: string
@@ -19,6 +20,14 @@ type InlineCodeKind =
   | 'boolean'
   | 'number'
   | 'string'
+  | 'field-auth'
+  | 'field-transaction'
+  | 'field-amount'
+  | 'field-network'
+  | 'field-wallet'
+  | 'field-status'
+  | 'field-time'
+  | 'field-result'
   | 'identifier'
   | 'default'
 
@@ -44,8 +53,13 @@ function classifyInlineCode(value: string): InlineCodeKind {
   ) {
     return 'string'
   }
-  if (/^[A-Za-z_$][\w$]*$/.test(trimmed) || /^[A-Za-z_$][\w$]*\.[A-Za-z_$][\w$]*$/.test(trimmed)) {
-    return 'identifier'
+  if (
+    /^\$?[A-Za-z_][\w$]*$/.test(trimmed) ||
+    /^\$?[A-Za-z_][\w$]*(?:\.[A-Za-z_][\w$]*|\[\])+$/.test(trimmed)
+  ) {
+    const group = classifyFieldGroup(trimmed)
+    if (group === 'identifier') return 'identifier'
+    return `field-${group}`
   }
 
   return 'default'

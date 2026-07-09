@@ -1,4 +1,4 @@
-# REST start payment
+# Start payment
 
 > REST equivalent of startBSCPayment, startPolygonPayment, startBasePayment, and startSOLPayment.
 

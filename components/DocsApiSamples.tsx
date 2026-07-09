@@ -1,5 +1,8 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { DocsCodeBlock } from './DocsCodeBlock'
+import DocsLangIcon from './DocsLangIcon'
+import DocsResponseFields from './DocsResponseFields'
+import DocsTryFieldInput from './DocsTryField'
 import {
   DocsTryConfig,
   DocsTryField,
@@ -18,7 +21,7 @@ type DocsApiSamplesProps = {
   onOverlayOpenChange?: (open: boolean) => void
 }
 
-type SampleLang = 'curl' | 'javascript' | 'python' | 'graphql'
+type SampleLang = 'curl' | 'javascript' | 'python' | 'graphql' | 'rust' | 'go'
 
 type TryResponse = {
   ok?: boolean
@@ -29,12 +32,15 @@ type TryResponse = {
   error?: string
 }
 
-const LANG_OPTIONS: { id: SampleLang; label: string }[] = [
+const BASE_LANG_OPTIONS: { id: SampleLang; label: string }[] = [
   { id: 'curl', label: 'cURL' },
   { id: 'javascript', label: 'JavaScript' },
   { id: 'python', label: 'Python' },
-  { id: 'graphql', label: 'GraphQL' },
+  { id: 'rust', label: 'Rust' },
+  { id: 'go', label: 'Go' },
 ]
+
+const GRAPHQL_LANG_OPTION = { id: 'graphql' as const, label: 'GraphQL' }
 
 const RESPONSE_STATUSES = ['200', '401', '402', '404', '500'] as const
 
@@ -50,8 +56,9 @@ function sampleVariables(config: DocsTryConfig): Record<string, unknown> {
       if (field.key === 'apiKey') vars.apiKey = 'YOUR_API_KEY'
       else if (field.key === 'privateKey') vars.privateKey = '0xYOUR_PRIVATE_KEY'
       else if (field.key === 'txnid') vars.txnid = 'YOUR_TXNID'
-      else if (field.type === 'number') vars[field.key] = 25.5
-      else if (field.required) vars[field.key] = field.placeholder || `YOUR_${field.key.toUpperCase()}`
+      else if (field.type === 'number') {
+        vars[field.key] = field.valueType.toLowerCase().includes('int') ? 100 : 25.5
+      } else if (field.required) vars[field.key] = field.placeholder || `YOUR_${field.key.toUpperCase()}`
       return
     }
     vars[field.key] = value
@@ -81,6 +88,58 @@ function buildGraphqlVariables(
   return values
 }
 
+function describeField(field: DocsTryField): string {
+  const required = field.required ? 'required' : 'optional'
+  const help = field.help || `${field.label} value.`
+  return `${required}. ${help}`
+}
+
+function buildGraphqlSample(
+  slug: string,
+  config: Extract<DocsTryConfig, { kind: 'graphql' }>,
+  gqlVars: Record<string, unknown>
+): string {
+  const isCustodianInput =
+    slug === 'create-custodian-account' || slug === 'update-custodian-details'
+
+  const variableDocs = isCustodianInput
+    ? [
+        '# $input: CustodianCreateInput! | CustodianUpdateInput!',
+        '#   Nested input object sent as the mutation argument.',
+        ...config.fields.map((field) => {
+          const path =
+            field.key === 'apiKey' || field.key === 'callbackUrl'
+              ? `input.${field.key}`
+              : `input.wallets.${field.key}`
+          return `#   ${path}: ${field.valueType} — ${describeField(field)}`
+        }),
+      ]
+    : config.fields.map(
+        (field) => `# $${field.key}: ${field.valueType} — ${describeField(field)}`
+      )
+
+  const responseDocs = (config.responseFields || []).map(
+    (field) => `# ${field.path}: ${field.valueType} — ${field.description}`
+  )
+
+  return [
+    '# GraphQL operation',
+    `# Endpoint: POST https://api.argonpay.app/graphql`,
+    `# Operation: ${config.operationName}`,
+    '#',
+    '# Variables',
+    ...(variableDocs.length ? variableDocs : ['# (no variables)']),
+    ...(responseDocs.length
+      ? ['#', '# Response fields', ...responseDocs]
+      : []),
+    '',
+    config.query.trim(),
+    '',
+    '# Example variables JSON (send beside the query)',
+    JSON.stringify(gqlVars, null, 2),
+  ].join('\n')
+}
+
 function buildSamples(slug: string, title: string, config: DocsTryConfig, endpoint?: string) {
   const vars = sampleVariables(config)
   const gqlVars = buildGraphqlVariables(slug, config, vars)
@@ -96,7 +155,8 @@ function buildSamples(slug: string, title: string, config: DocsTryConfig, endpoi
         curl: `curl --request ${config.method} \\\n  --url '${restUrl}'`,
         javascript: `const response = await fetch('${restUrl}', {\n  method: '${config.method}'\n})\n\nconst data = await response.json()\nconsole.log(data)`,
         python: `import requests\n\nurl = "${restUrl}"\n\nresponse = requests.${config.method.toLowerCase()}(url)\nprint(response.json())`,
-        graphql: `// REST endpoint — no GraphQL body\n${config.method} ${path}`,
+        rust: `use reqwest::Error;\n\n#[tokio::main]\nasync fn main() -> Result<(), Error> {\n    let response = reqwest::Client::new()\n        .${config.method.toLowerCase()}("${restUrl}")\n        .send()\n        .await?\n        .json::<serde_json::Value>()\n        .await?;\n\n    println!("{response}");\n    Ok(())\n}`,
+        go: `package main\n\nimport (\n\t"fmt"\n\t"io"\n\t"net/http"\n)\n\nfunc main() {\n\treq, err := http.NewRequest("${config.method}", "${restUrl}", nil)\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\n\tres, err := http.DefaultClient.Do(req)\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\tdefer res.Body.Close()\n\n\tbody, err := io.ReadAll(res.Body)\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\n\tfmt.Println(string(body))\n}`,
         title,
       }
     }
@@ -104,7 +164,8 @@ function buildSamples(slug: string, title: string, config: DocsTryConfig, endpoi
       curl: `curl --request ${config.method} \\\n  --url '${restUrl}' \\\n  --header 'Content-Type: application/json' \\\n  --data '${escapeShell(JSON.stringify(vars))}'`,
       javascript: `const response = await fetch('${restUrl}', {\n  method: '${config.method}',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify(${body})\n})\n\nconst data = await response.json()\nconsole.log(data)`,
       python: `import requests\n\nurl = "${restUrl}"\npayload = ${body}\n\nresponse = requests.${config.method.toLowerCase()}(url, json=payload)\nprint(response.json())`,
-      graphql: `// REST endpoint — no GraphQL body\n${config.method} ${path}`,
+      rust: `use reqwest::Error;\n\n#[tokio::main]\nasync fn main() -> Result<(), Error> {\n    let client = reqwest::Client::new();\n    let payload = serde_json::json!(${body});\n\n    let response = client\n        .${config.method.toLowerCase()}("${restUrl}")\n        .json(&payload)\n        .send()\n        .await?\n        .json::<serde_json::Value>()\n        .await?;\n\n    println!("{response}");\n    Ok(())\n}`,
+      go: `package main\n\nimport (\n\t"bytes"\n\t"fmt"\n\t"io"\n\t"net/http"\n)\n\nfunc main() {\n\tpayload := []byte(\`${JSON.stringify(vars)}\`)\n\treq, err := http.NewRequest("${config.method}", "${restUrl}", bytes.NewBuffer(payload))\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\treq.Header.Set("Content-Type", "application/json")\n\n\tres, err := http.DefaultClient.Do(req)\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\tdefer res.Body.Close()\n\n\tbody, err := io.ReadAll(res.Body)\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\n\tfmt.Println(string(body))\n}`,
       title,
     }
   }
@@ -121,7 +182,9 @@ function buildSamples(slug: string, title: string, config: DocsTryConfig, endpoi
     curl: `curl --request POST \\\n  --url '${url}' \\\n  --header 'Content-Type: application/json' \\\n  --data '${escapeShell(compactPayload)}'`,
     javascript: `const response = await fetch('${url}', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify(${payloadJson})\n})\n\nconst data = await response.json()\nconsole.log(data)`,
     python: `import requests\n\nurl = "${url}"\npayload = ${payloadJson}\n\nresponse = requests.post(url, json=payload)\nprint(response.json())`,
-    graphql: config.query.trim(),
+    graphql: buildGraphqlSample(slug, config, gqlVars),
+    rust: `use reqwest::Error;\n\n#[tokio::main]\nasync fn main() -> Result<(), Error> {\n    let client = reqwest::Client::new();\n    let payload = serde_json::json!(${payloadJson});\n\n    let response = client\n        .post("${url}")\n        .json(&payload)\n        .send()\n        .await?\n        .json::<serde_json::Value>()\n        .await?;\n\n    println!("{response}");\n    Ok(())\n}`,
+    go: `package main\n\nimport (\n\t"bytes"\n\t"fmt"\n\t"io"\n\t"net/http"\n)\n\nfunc main() {\n\tpayload := []byte(\`${compactPayload}\`)\n\treq, err := http.NewRequest("POST", "${url}", bytes.NewBuffer(payload))\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\treq.Header.Set("Content-Type", "application/json")\n\n\tres, err := http.DefaultClient.Do(req)\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\tdefer res.Body.Close()\n\n\tbody, err := io.ReadAll(res.Body)\n\tif err != nil {\n\t\tpanic(err)\n\t}\n\n\tfmt.Println(string(body))\n}`,
     title,
   }
 }
@@ -235,6 +298,19 @@ export default function DocsApiSamples({
   onOverlayOpenChange,
 }: DocsApiSamplesProps) {
   const config = useMemo(() => getDocsTryConfig(slug), [slug])
+  const langOptions = useMemo(() => {
+    if (!config) return BASE_LANG_OPTIONS
+    return config.kind === 'graphql'
+      ? [
+          BASE_LANG_OPTIONS[0],
+          BASE_LANG_OPTIONS[1],
+          BASE_LANG_OPTIONS[2],
+          GRAPHQL_LANG_OPTION,
+          BASE_LANG_OPTIONS[3],
+          BASE_LANG_OPTIONS[4],
+        ]
+      : BASE_LANG_OPTIONS
+  }, [config])
   const [lang, setLang] = useState<SampleLang>('curl')
   const [langOpen, setLangOpen] = useState(false)
   const [status, setStatus] = useState<(typeof RESPONSE_STATUSES)[number]>('200')
@@ -259,6 +335,12 @@ export default function DocsApiSamples({
     setStatus('200')
     setCopied(null)
   }, [config, slug])
+
+  useEffect(() => {
+    if (!langOptions.some((option) => option.id === lang)) {
+      setLang('curl')
+    }
+  }, [lang, langOptions])
 
   useEffect(() => {
     if (!langOpen) return
@@ -292,9 +374,12 @@ export default function DocsApiSamples({
 
   if (!config) return null
 
-  const samples = buildSamples(slug, title, config, endpoint)
+  const samples = buildSamples(slug, title, config, endpoint) as Record<SampleLang, string> & {
+    title: string
+  }
   const responses = sampleResponses(operation)
-  const activeLang = LANG_OPTIONS.find((item) => item.id === lang) || LANG_OPTIONS[0]
+  const activeLang = langOptions.find((item) => item.id === lang) || langOptions[0]
+  const activeSample = samples[activeLang.id] || samples.curl
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -365,6 +450,7 @@ export default function DocsApiSamples({
                     aria-expanded={langOpen}
                     onClick={() => setLangOpen((open) => !open)}
                   >
+                    <DocsLangIcon language={activeLang.id} size={14} />
                     <span>{activeLang.label}</span>
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                       <path
@@ -378,7 +464,7 @@ export default function DocsApiSamples({
                   </button>
                   {langOpen ? (
                     <div className="docs-lang-menu" role="listbox">
-                      {LANG_OPTIONS.map((option) => (
+                      {langOptions.map((option) => (
                         <button
                           key={option.id}
                           type="button"
@@ -390,7 +476,10 @@ export default function DocsApiSamples({
                             setLangOpen(false)
                           }}
                         >
-                          <span>{option.label}</span>
+                          <span className="docs-lang-option-label">
+                            <DocsLangIcon language={option.id} size={14} />
+                            <span>{option.label}</span>
+                          </span>
                           {option.id === lang ? <span className="docs-lang-check">✓</span> : null}
                         </button>
                       ))}
@@ -401,7 +490,7 @@ export default function DocsApiSamples({
                   type="button"
                   className="docs-copy-btn"
                   aria-label={copied === 'request' ? 'Copied' : 'Copy request'}
-                  onClick={() => copyText(samples[lang], 'request')}
+                  onClick={() => copyText(activeSample, 'request')}
                 >
                   {copied === 'request' ? (
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -427,8 +516,8 @@ export default function DocsApiSamples({
               </div>
             </div>
             <DocsCodeBlock
-              language={lang === 'curl' ? 'bash' : lang}
-              code={samples[lang]}
+              language={activeLang.id === 'curl' ? 'bash' : activeLang.id}
+              code={activeSample}
               showToolbar={false}
             />
           </section>
@@ -480,6 +569,8 @@ export default function DocsApiSamples({
             <DocsCodeBlock language="json" code={responses[status]} showToolbar={false} />
           </section>
 
+          <DocsResponseFields fields={config.responseFields} />
+
           {method || endpoint ? (
             <p className="docs-sample-meta">
               {method || 'POST'} · {endpoint || 'https://api.argonpay.app/graphql'}
@@ -514,33 +605,22 @@ export default function DocsApiSamples({
             <form className="docs-try-body" onSubmit={handleSubmit}>
               <div className="docs-try-grid is-stack">
                 <div className="docs-try-fields">
+                  <div className="docs-schema-head is-inline">
+                    <h3 className="docs-schema-title">Request inputs</h3>
+                    <p className="docs-schema-copy">Each field shows its API value type.</p>
+                  </div>
                   {config.fields.map((field) => (
-                    <label key={field.key} className="docs-try-field">
-                      <span>
-                        {field.label}
-                        {field.required ? <em>*</em> : null}
-                      </span>
-                      <input
-                        type={
-                          field.type === 'password'
-                            ? 'password'
-                            : field.type === 'number'
-                              ? 'number'
-                              : 'text'
-                        }
-                        value={values[field.key] ?? ''}
-                        placeholder={field.placeholder}
-                        onChange={(event) =>
-                          setValues((previous) => ({
-                            ...previous,
-                            [field.key]: event.target.value,
-                          }))
-                        }
-                        autoComplete="off"
-                        spellCheck={false}
-                      />
-                      {field.help ? <small>{field.help}</small> : null}
-                    </label>
+                    <DocsTryFieldInput
+                      key={field.key}
+                      field={field}
+                      value={values[field.key] ?? ''}
+                      onChange={(value) =>
+                        setValues((previous) => ({
+                          ...previous,
+                          [field.key]: value,
+                        }))
+                      }
+                    />
                   ))}
 
                   <div className="docs-try-actions">
@@ -568,6 +648,7 @@ export default function DocsApiSamples({
                   <pre className="docs-try-output">
                     <code>{responseText || 'Response will appear here.'}</code>
                   </pre>
+                  <DocsResponseFields fields={config.responseFields} />
                 </div>
               </div>
             </form>

@@ -48,14 +48,11 @@ export const DOCS_NAV: DocsNavGroup[] = [
     "label": "Payments",
     "items": [
       "payment",
-      "create-payment-rest",
       "start-bsc-payment",
       "start-polygon-payment",
       "start-base-payment",
       "start-sol-payment",
-      "pay-rest",
       "cancel-payment",
-      "cancel-payment-rest",
       "manual-mark-as-completed"
     ]
   },
@@ -65,9 +62,18 @@ export const DOCS_NAV: DocsNavGroup[] = [
     "items": [
       "get-transaction-details",
       "get-txn-details",
-      "get-order-rest",
       "get-transactions",
       "check-admin-untransferred"
+    ]
+  },
+  {
+    "id": "rest-api",
+    "label": "REST API",
+    "items": [
+      "create-payment-rest",
+      "pay-rest",
+      "cancel-payment-rest",
+      "get-order-rest"
     ]
   }
 ]
@@ -146,11 +152,11 @@ export const DOCS_PAGES: DocsPage[] = [
     summary: "Create a pending payment and return a hosted checkout payment link.",
     endpoint: "https://api.argonpay.app/graphql",
     operation: "payment",
-    markdown: "Creates a pending merchant payment and returns a hosted `paymentLink`. Requires an existing custodian for the API key.\n\n**Does not debit** a query on create. A query is consumed later when the payment is started on-chain (hosted checkout / start flow).\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation Payment($apiKey: String!, $amount: Float!) {\n  payment(apiKey: $apiKey, amount: $amount) {\n    code\n    message\n    paymentLink\n    transaction {\n      txnid\n      amount\n      status\n      createdAt\n      expiresAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `apiKey` | `String!` | Yes | Your API key |\n| `amount` | `Float!` | Yes | Payment amount |\n\n## Example variables\n\n```json\n{\n  \"apiKey\": \"YOUR_API_KEY\",\n  \"amount\": 25.5\n}\n```\n\n## Success shape\n\n```json\n{\n  \"data\": {\n    \"payment\": {\n      \"code\": 200,\n      \"message\": \"Transaction created successfully\",\n      \"paymentLink\": \"https://argonpay.app/pay?txnid=...\",\n      \"transaction\": {\n        \"txnid\": \"...\",\n        \"amount\": 25.5,\n        \"status\": \"PENDING\"\n      }\n    }\n  }\n}\n```\n\nRedirect your customer to `paymentLink` to complete network selection and deposit.\n\n## REST equivalent\n\nSee [REST create payment](/create-payment-rest) (`POST /create-payment`).\n",
+    markdown: "Creates a pending merchant payment and returns a hosted `paymentLink`. Requires an existing custodian for the API key.\n\n**Does not debit** a query on create. A query is consumed later when the payment is started on-chain (hosted checkout / start flow).\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation Payment($apiKey: String!, $amount: Float!) {\n  payment(apiKey: $apiKey, amount: $amount) {\n    code\n    message\n    paymentLink\n    transaction {\n      txnid\n      amount\n      status\n      createdAt\n      expiresAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `apiKey` | `String!` | Yes | Your API key |\n| `amount` | `Float!` | Yes | Payment amount |\n\n## Example variables\n\n```json\n{\n  \"apiKey\": \"YOUR_API_KEY\",\n  \"amount\": 25.5\n}\n```\n\n## Success shape\n\n```json\n{\n  \"data\": {\n    \"payment\": {\n      \"code\": 200,\n      \"message\": \"Transaction created successfully\",\n      \"paymentLink\": \"https://argonpay.app/pay?txnid=...\",\n      \"transaction\": {\n        \"txnid\": \"...\",\n        \"amount\": 25.5,\n        \"status\": \"PENDING\"\n      }\n    }\n  }\n}\n```\n\nRedirect your customer to `paymentLink` to complete network selection and deposit.\n\n## REST equivalent\n\nSee [Create payment](/create-payment-rest) (`POST /create-payment`).\n",
   },
   {
     slug: "create-payment-rest",
-    title: "REST create payment",
+    title: "Create payment",
     method: "POST",
     summary: "REST equivalent of the GraphQL payment mutation.",
     endpoint: "https://api.argonpay.app/create-payment",
@@ -164,7 +170,7 @@ export const DOCS_PAGES: DocsPage[] = [
     summary: "Start monitoring a pending payment on BNB Smart Chain (BEP20).",
     endpoint: "https://api.argonpay.app/graphql",
     operation: "startBSCPayment",
-    markdown: "Starts a pending payment on **BEP20** (BNB Smart Chain). Generates/activates the deposit wallet and begins monitoring. Takes `txnid` (from `payment`). Debits **1 query** from the transaction owner's API key when the payment is started.\n\nOptional `token`: `USDT` or `USDC`.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation StartBSCPayment($txnid: String!, $token: StableToken) {\n  startBSCPayment(txnid: $txnid, token: $token) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      token\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Pending transaction ID |\n| `token` | `StableToken` | No | `USDT` or `USDC` |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\",\n  \"token\": \"USDT\"\n}\n```\n\n## REST equivalent\n\nSee [REST start payment](/pay-rest) (`POST /pay` with `network: \"bep20\"`).\n",
+    markdown: "Starts a pending payment on **BEP20** (BNB Smart Chain). Generates/activates the deposit wallet and begins monitoring. Takes `txnid` (from `payment`). Debits **1 query** from the transaction owner's API key when the payment is started.\n\nOptional `token`: `USDT` or `USDC`.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation StartBSCPayment($txnid: String!, $token: StableToken) {\n  startBSCPayment(txnid: $txnid, token: $token) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      token\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Pending transaction ID |\n| `token` | `StableToken` | No | `USDT` or `USDC` |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\",\n  \"token\": \"USDT\"\n}\n```\n\n## REST equivalent\n\nSee [Start payment](/pay-rest) (`POST /pay` with `network: \"bep20\"`).\n",
   },
   {
     slug: "start-polygon-payment",
@@ -173,7 +179,7 @@ export const DOCS_PAGES: DocsPage[] = [
     summary: "Start monitoring a pending payment on Polygon.",
     endpoint: "https://api.argonpay.app/graphql",
     operation: "startPolygonPayment",
-    markdown: "Starts a pending payment on **Polygon**. Debits **1 query** from the transaction owner's API key when started.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation StartPolygonPayment($txnid: String!, $token: StableToken) {\n  startPolygonPayment(txnid: $txnid, token: $token) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      token\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Pending transaction ID |\n| `token` | `StableToken` | No | `USDT` or `USDC` |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\",\n  \"token\": \"USDT\"\n}\n```\n\n## REST equivalent\n\nSee [REST start payment](/pay-rest) (`POST /pay` with `network: \"polygon\"`).\n",
+    markdown: "Starts a pending payment on **Polygon**. Debits **1 query** from the transaction owner's API key when started.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation StartPolygonPayment($txnid: String!, $token: StableToken) {\n  startPolygonPayment(txnid: $txnid, token: $token) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      token\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Pending transaction ID |\n| `token` | `StableToken` | No | `USDT` or `USDC` |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\",\n  \"token\": \"USDT\"\n}\n```\n\n## REST equivalent\n\nSee [Start payment](/pay-rest) (`POST /pay` with `network: \"polygon\"`).\n",
   },
   {
     slug: "start-base-payment",
@@ -182,7 +188,7 @@ export const DOCS_PAGES: DocsPage[] = [
     summary: "Start monitoring a pending payment on Base.",
     endpoint: "https://api.argonpay.app/graphql",
     operation: "startBasePayment",
-    markdown: "Starts a pending payment on **Base**. Debits **1 query** from the transaction owner's API key when started.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation StartBasePayment($txnid: String!, $token: StableToken) {\n  startBasePayment(txnid: $txnid, token: $token) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      token\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Pending transaction ID |\n| `token` | `StableToken` | No | `USDT` or `USDC` |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\",\n  \"token\": \"USDT\"\n}\n```\n\n## REST equivalent\n\nSee [REST start payment](/pay-rest) (`POST /pay` with `network: \"base\"`).\n",
+    markdown: "Starts a pending payment on **Base**. Debits **1 query** from the transaction owner's API key when started.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation StartBasePayment($txnid: String!, $token: StableToken) {\n  startBasePayment(txnid: $txnid, token: $token) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      token\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Pending transaction ID |\n| `token` | `StableToken` | No | `USDT` or `USDC` |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\",\n  \"token\": \"USDT\"\n}\n```\n\n## REST equivalent\n\nSee [Start payment](/pay-rest) (`POST /pay` with `network: \"base\"`).\n",
   },
   {
     slug: "start-sol-payment",
@@ -191,11 +197,11 @@ export const DOCS_PAGES: DocsPage[] = [
     summary: "Start monitoring a pending payment on Solana.",
     endpoint: "https://api.argonpay.app/graphql",
     operation: "startSOLPayment",
-    markdown: "Starts a pending payment on **Solana** (native SOL). Debits **1 query** from the transaction owner's API key when started.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation StartSOLPayment($txnid: String!) {\n  startSOLPayment(txnid: $txnid) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Pending transaction ID |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\"\n}\n```\n\n## REST equivalent\n\nSee [REST start payment](/pay-rest) (`POST /pay` with `network: \"sol\"`).\n",
+    markdown: "Starts a pending payment on **Solana** (native SOL). Debits **1 query** from the transaction owner's API key when started.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation StartSOLPayment($txnid: String!) {\n  startSOLPayment(txnid: $txnid) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Pending transaction ID |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\"\n}\n```\n\n## REST equivalent\n\nSee [Start payment](/pay-rest) (`POST /pay` with `network: \"sol\"`).\n",
   },
   {
     slug: "pay-rest",
-    title: "REST start payment",
+    title: "Start payment",
     method: "POST",
     summary: "REST equivalent of startBSCPayment, startPolygonPayment, startBasePayment, and startSOLPayment.",
     endpoint: "https://api.argonpay.app/pay",
@@ -209,11 +215,11 @@ export const DOCS_PAGES: DocsPage[] = [
     summary: "Cancel a payment that has not already been finalized.",
     endpoint: "https://api.argonpay.app/graphql",
     operation: "cancelPayment",
-    markdown: "Cancels a payment that is not already finalized (`completed`, `expired`, or `cancelled`). Takes `txnid` only.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation CancelPayment($txnid: String!) {\n  cancelPayment(txnid: $txnid) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      status\n      network\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Transaction ID to cancel |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\"\n}\n```\n\n## REST equivalent\n\nSee [REST cancel payment](/cancel-payment-rest) (`POST /cancel-payment`).\n",
+    markdown: "Cancels a payment that is not already finalized (`completed`, `expired`, or `cancelled`). Takes `txnid` only.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Mutation\n\n```graphql\nmutation CancelPayment($txnid: String!) {\n  cancelPayment(txnid: $txnid) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      status\n      network\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Transaction ID to cancel |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\"\n}\n```\n\n## REST equivalent\n\nSee [Cancel payment](/cancel-payment-rest) (`POST /cancel-payment`).\n",
   },
   {
     slug: "cancel-payment-rest",
-    title: "REST cancel payment",
+    title: "Cancel payment",
     method: "POST",
     summary: "REST equivalent of the GraphQL cancelPayment mutation.",
     endpoint: "https://api.argonpay.app/cancel-payment",
@@ -245,11 +251,11 @@ export const DOCS_PAGES: DocsPage[] = [
     summary: "Look up a payment by txnid for hosted checkout and order status.",
     endpoint: "https://api.argonpay.app/graphql",
     operation: "getTxnDetails",
-    markdown: "Looks up a payment by `txnid`. Used by the hosted checkout and order status pages. No `apiKey` argument \u2014 anyone with the `txnid` can read the public transaction fields.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Query\n\n```graphql\nquery GetTxnDetails($txnid: String!) {\n  getTxnDetails(txnid: $txnid) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      token\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      hash\n      blockchainLink\n      isExpired\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Transaction ID from `payment` / `create-payment` |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\"\n}\n```\n\n## REST equivalent\n\nSee [REST get order](/get-order-rest) (`GET /orders/:txnid`).\n",
+    markdown: "Looks up a payment by `txnid`. Used by the hosted checkout and order status pages. No `apiKey` argument \u2014 anyone with the `txnid` can read the public transaction fields.\n\n## Endpoint\n\n`POST https://api.argonpay.app/graphql`\n\n## Query\n\n```graphql\nquery GetTxnDetails($txnid: String!) {\n  getTxnDetails(txnid: $txnid) {\n    code\n    message\n    transaction {\n      txnid\n      amount\n      amountInToken\n      token\n      network\n      status\n      wallet {\n        address\n      }\n      countdown\n      hash\n      blockchainLink\n      isExpired\n      expiresAt\n      createdAt\n    }\n  }\n}\n```\n\n## Arguments\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `txnid` | `String!` | Yes | Transaction ID from `payment` / `create-payment` |\n\n## Example variables\n\n```json\n{\n  \"txnid\": \"YOUR_TXNID\"\n}\n```\n\n## REST equivalent\n\nSee [Get order](/get-order-rest) (`GET /orders/:txnid`).\n",
   },
   {
     slug: "get-order-rest",
-    title: "REST get order",
+    title: "Get order",
     method: "GET",
     summary: "REST equivalent of the GraphQL getTxnDetails query.",
     endpoint: "https://api.argonpay.app/orders/{txnid}",

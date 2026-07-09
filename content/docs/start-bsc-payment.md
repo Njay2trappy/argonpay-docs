@@ -53,7 +53,7 @@ mutation StartBSCPayment($txnid: String!, $token: StableToken) {
 
 ## REST equivalent
 
-See [REST start payment](/pay-rest) (`POST /pay` with `network: "bep20"`).
+See [Start payment](/pay-rest) (`POST /pay` with `network: "bep20"`).
 
 `POST https://api.argonpay.app/pay` with body `{ "txnid": "...", "network": "bep20", "token": "USDT" }`
 
