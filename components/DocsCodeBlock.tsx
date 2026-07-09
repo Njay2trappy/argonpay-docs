@@ -9,6 +9,7 @@ export type DocsCodeSnippet = {
 type DocsCodeBlockProps = {
   language?: string
   code: string
+  showToolbar?: boolean
 }
 
 type DocsCodeTabsProps = {
@@ -65,12 +66,16 @@ const argonCodeTheme = {
       style: { color: '#6a6a6a' },
     },
     {
-      types: ['property', 'tag', 'boolean', 'number', 'constant', 'symbol'],
-      style: { color: '#8a2be2' },
+      types: ['property', 'tag', 'attr-name'],
+      style: { color: '#0a7a3e' },
     },
     {
-      types: ['selector', 'attr-name', 'string', 'char', 'builtin', 'inserted'],
-      style: { color: '#0a7a3e' },
+      types: ['boolean', 'number', 'constant', 'symbol', 'null'],
+      style: { color: '#0550ae' },
+    },
+    {
+      types: ['selector', 'string', 'char', 'builtin', 'inserted'],
+      style: { color: '#0550ae' },
     },
     {
       types: ['operator', 'entity', 'url'],
@@ -78,7 +83,7 @@ const argonCodeTheme = {
     },
     {
       types: ['atrule', 'attr-value', 'keyword'],
-      style: { color: '#31074c' },
+      style: { color: '#9a3412' },
     },
     {
       types: ['function', 'class-name'],
@@ -108,15 +113,17 @@ function languageLabel(language?: string): string {
   return normalized.toUpperCase()
 }
 
-export function DocsCodeBlock({ language, code }: DocsCodeBlockProps) {
+export function DocsCodeBlock({ language, code, showToolbar = true }: DocsCodeBlockProps) {
   const prismLanguage = resolvePrismLanguage(language)
   const label = languageLabel(language)
 
   return (
     <div className="docs-code" data-language={normalizeLanguage(language)}>
-      <div className="docs-code-toolbar">
-        <span className="docs-code-lang">{label}</span>
-      </div>
+      {showToolbar ? (
+        <div className="docs-code-toolbar">
+          <span className="docs-code-lang">{label}</span>
+        </div>
+      ) : null}
       <Highlight theme={argonCodeTheme} code={code.replace(/\n$/, '')} language={prismLanguage}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
           <pre className={`docs-code-pre ${className}`} style={style}>

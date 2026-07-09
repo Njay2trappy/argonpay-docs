@@ -1,9 +1,9 @@
 import Head from 'next/head'
 import Link from 'next/link'
+import DocsApiSamples from './DocsApiSamples'
 import DocsBrandHeader from './DocsBrandHeader'
 import DocsMarkdown from './DocsMarkdown'
 import DocsSidebar from './DocsSidebar'
-import DocsTryIt from './DocsTryIt'
 import { DocsPage, DOCS_NAV, DOCS_PAGES } from '../utils/docsData'
 
 type DocsLayoutProps = {
@@ -116,11 +116,15 @@ export default function DocsLayout({ page }: DocsLayoutProps) {
 
                 {isApiRef ? (
                   <aside className="docs-examples" aria-label="Request examples">
-                    <DocsTryIt slug={page.slug} title={page.title} compact />
+                    <DocsApiSamples
+                      slug={page.slug}
+                      title={page.title}
+                      endpoint={page.endpoint}
+                      method={page.method}
+                      operation={page.operation}
+                    />
                   </aside>
-                ) : (
-                  <DocsTryIt slug={page.slug} title={page.title} />
-                )}
+                ) : null}
               </div>
             </article>
           </div>
