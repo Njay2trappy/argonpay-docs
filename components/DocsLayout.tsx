@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import DocsApiSamples from './DocsApiSamples'
 import DocsBrandHeader from './DocsBrandHeader'
+import DocsDesktopPriorityModal from './DocsDesktopPriorityModal'
 import DocsMarkdown from './DocsMarkdown'
 import DocsSidebar from './DocsSidebar'
 import { DocsPage, DOCS_NAV, DOCS_PAGES } from '../utils/docsData'
@@ -61,6 +62,7 @@ export default function DocsLayout({ page }: DocsLayoutProps) {
 
       <div className="docs-page">
         <DocsBrandHeader />
+        <DocsDesktopPriorityModal />
 
         <main className="docs-main">
           <div className={`docs-shell${isApiRef ? ' is-api-ref' : ''}`}>
