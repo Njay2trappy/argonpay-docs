@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
+import DocsBrandHeader from './DocsBrandHeader'
 import DocsMarkdown from './DocsMarkdown'
 import DocsSidebar from './DocsSidebar'
 import DocsTryIt from './DocsTryIt'
@@ -55,6 +56,8 @@ export default function DocsLayout({ page }: DocsLayoutProps) {
       </Head>
 
       <div className="docs-page">
+        <DocsBrandHeader />
+
         <main className="docs-main">
           <div className={`docs-shell${isApiRef ? ' is-api-ref' : ''}`}>
             <DocsSidebar activeSlug={page.slug} />

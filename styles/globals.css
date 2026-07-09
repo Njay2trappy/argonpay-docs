@@ -1539,6 +1539,51 @@ body{
   background: #fafafa;
 }
 
+.docs-brand-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid #ececec;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.docs-brand-header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+}
+
+.docs-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #111111;
+}
+
+.docs-brand-link:hover,
+.docs-brand-link:focus {
+  color: #31074c;
+}
+
+.docs-brand-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+.docs-brand-name {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
 .docs-main {
   flex: 1 1 auto;
 }
@@ -1559,11 +1604,11 @@ body{
 
 .docs-sidebar {
   position: sticky;
-  top: 24px;
+  top: 72px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-height: calc(100vh - 48px);
+  max-height: calc(100vh - 96px);
   overflow-y: auto;
   padding-right: 8px;
   scrollbar-width: thin;
@@ -2050,7 +2095,7 @@ body{
 
 .docs-examples {
   position: sticky;
-  top: 24px;
+  top: 72px;
   min-width: 0;
 }
 
