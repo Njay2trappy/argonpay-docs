@@ -34,69 +34,55 @@ const API_KEY_FIELD: DocsTryField = {
   label: 'API key',
   type: 'password',
   required: true,
-  placeholder: 'your-api-key',
+  placeholder: 'YOUR_API_KEY',
 }
 
 export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
-  'create-apikey': {
+  'get-queries-left': {
     kind: 'graphql',
-    operationName: 'CreateApiKey',
-    query: `mutation CreateApiKey(
-  $firstName: String!,
-  $lastName: String!,
-  $email: String!,
-  $password: String!,
-  $privateKey: String!
-) {
-  createApiKey(
-    firstName: $firstName,
-    lastName: $lastName,
-    email: $email,
-    password: $password,
-    privateKey: $privateKey
-  ) {
-    key
-    wallet
+    operationName: 'GetQueriesLeft',
+    query: `query GetQueriesLeft($apiKey: String!) {
+  getQueriesLeft(apiKey: $apiKey) {
+    code
+    message
     queriesLeft
+    apiKey {
+      queriesLeft
+      wallet
+      email
+    }
   }
 }`,
-    fields: [
-      { key: 'firstName', label: 'First name', type: 'string', required: true, placeholder: 'John' },
-      { key: 'lastName', label: 'Last name', type: 'string', required: true, placeholder: 'Doe' },
-      { key: 'email', label: 'Email', type: 'string', required: true, placeholder: 'john@example.com' },
-      { key: 'password', label: 'Password', type: 'password', required: true, placeholder: 'securePassword123' },
-      {
-        key: 'privateKey',
-        label: 'Private key',
-        type: 'password',
-        required: true,
-        placeholder: '0x...',
-        help: 'Dedicated USDT-BEP20 wallet private key',
-      },
-    ],
-    defaults: {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      password: '',
-      privateKey: '',
-    },
+    fields: [API_KEY_FIELD],
+    defaults: { apiKey: '' },
   },
   'revoke-apikey': {
     kind: 'graphql',
     operationName: 'RevokeApiKey',
-    query: `mutation RevokeApiKey($apiKey: String!, $password: String!) {
-  revokeApiKey(apiKey: $apiKey, password: $password) {
+    query: `mutation RevokeApiKey($apiKey: String!, $privateKey: String!) {
+  revokeApiKey(apiKey: $apiKey, privateKey: $privateKey) {
     code
     message
     newApiKey
+    apiKey {
+      key
+      wallet
+      queriesLeft
+    }
   }
 }`,
     fields: [
       API_KEY_FIELD,
-      { key: 'password', label: 'Password', type: 'password', required: true },
+      {
+        key: 'privateKey',
+        label: 'Wallet private key',
+        type: 'password',
+        required: true,
+        placeholder: '0x...',
+        help: 'Must match the wallet address registered on the API key',
+      },
     ],
-    defaults: { apiKey: '', password: '' },
+    defaults: { apiKey: '', privateKey: '' },
   },
   'recharge-apikey': {
     kind: 'graphql',
@@ -106,232 +92,113 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
     code
     message
     newBalance
+    apiKey {
+      queriesLeft
+      wallet
+    }
   }
 }`,
     fields: [
       API_KEY_FIELD,
-      { key: 'privateKey', label: 'Private key', type: 'password', required: true, placeholder: '0x...' },
-      { key: 'unit', label: 'Units', type: 'number', required: true, placeholder: '50' },
+      {
+        key: 'privateKey',
+        label: 'Wallet private key',
+        type: 'password',
+        required: true,
+        placeholder: '0x...',
+      },
+      { key: 'unit', label: 'Units', type: 'number', required: true, placeholder: '100' },
     ],
-    defaults: { apiKey: '', privateKey: '', unit: 50 },
+    defaults: { apiKey: '', privateKey: '', unit: 100 },
   },
   'create-custodian-account': {
     kind: 'graphql',
     operationName: 'CreateCustodianAccount',
-    query: `mutation CreateCustodianAccount(
-  $apiKey: String!,
-  $bep20: String,
-  $solana: String,
-  $ton: String,
-  $usdtTon: String,
-  $BSCpayAddress: String,
-  $usdtTONPayAddress: String
-) {
-  createCustodianAccount(
-    apiKey: $apiKey,
-    bep20: $bep20,
-    solana: $solana,
-    ton: $ton,
-    usdtTon: $usdtTon,
-    BSCpayAddress: $BSCpayAddress,
-    usdtTONPayAddress: $usdtTONPayAddress
-  ) {
+    query: `mutation CreateCustodianAccount($input: CustodianCreateInput!) {
+  createCustodianAccount(input: $input) {
     code
     message
     custodian {
-      apiKey
-      bep20
-      solana
-      ton
-      usdtTon
+      id
+      wallets {
+        bep20
+        polygon
+        base
+        solana
+      }
+      callbackUrl
+      createdAt
+    }
+    apiKey {
+      queriesLeft
     }
   }
 }`,
     fields: [
       API_KEY_FIELD,
       { key: 'bep20', label: 'BEP20 wallet', type: 'string', placeholder: '0x...' },
-      { key: 'solana', label: 'Solana wallet', type: 'string' },
-      { key: 'ton', label: 'TON wallet', type: 'string' },
-      { key: 'usdtTon', label: 'USDT-TON wallet', type: 'string' },
-      { key: 'BSCpayAddress', label: 'BSC pay private key', type: 'password', required: true },
-      { key: 'usdtTONPayAddress', label: 'USDT-TON pay private key', type: 'password', required: true },
+      { key: 'polygon', label: 'Polygon wallet', type: 'string', placeholder: '0x...' },
+      { key: 'base', label: 'Base wallet', type: 'string', placeholder: '0x...' },
+      { key: 'solana', label: 'Solana wallet', type: 'string', placeholder: 'Solana address' },
+      {
+        key: 'callbackUrl',
+        label: 'Callback URL',
+        type: 'string',
+        placeholder: 'https://merchant.example/webhooks/argonpay',
+      },
     ],
     defaults: {
       apiKey: '',
       bep20: '',
+      polygon: '',
+      base: '',
       solana: '',
-      ton: '',
-      usdtTon: '',
-      BSCpayAddress: '',
-      usdtTONPayAddress: '',
+      callbackUrl: '',
     },
   },
   'update-custodian-details': {
     kind: 'graphql',
     operationName: 'UpdateCustodianDetails',
-    query: `mutation UpdateCustodianDetails(
-  $apiKey: String!,
-  $bep20: String,
-  $solana: String,
-  $ton: String,
-  $usdtTon: String,
-  $BSCpayAddress: String,
-  $usdtTONPayAddress: String
-) {
-  updateCustodianDetails(
-    apiKey: $apiKey,
-    bep20: $bep20,
-    solana: $solana,
-    ton: $ton,
-    usdtTon: $usdtTon,
-    BSCpayAddress: $BSCpayAddress,
-    usdtTONPayAddress: $usdtTONPayAddress
-  ) {
+    query: `mutation UpdateCustodianDetails($input: CustodianUpdateInput!) {
+  updateCustodianDetails(input: $input) {
     code
     message
     custodian {
-      apiKey
-      bep20
-      solana
-      ton
-      usdtTon
+      id
+      wallets {
+        bep20
+        polygon
+        base
+        solana
+      }
+      callbackUrl
+    }
+    apiKey {
+      queriesLeft
     }
   }
 }`,
     fields: [
       API_KEY_FIELD,
-      { key: 'bep20', label: 'BEP20 wallet', type: 'string' },
-      { key: 'solana', label: 'Solana wallet', type: 'string' },
-      { key: 'ton', label: 'TON wallet', type: 'string' },
-      { key: 'usdtTon', label: 'USDT-TON wallet', type: 'string' },
-      { key: 'BSCpayAddress', label: 'BSC pay private key', type: 'password' },
-      { key: 'usdtTONPayAddress', label: 'USDT-TON pay private key', type: 'password' },
+      { key: 'bep20', label: 'BEP20 wallet', type: 'string', placeholder: '0x...' },
+      { key: 'polygon', label: 'Polygon wallet', type: 'string', placeholder: '0x...' },
+      { key: 'base', label: 'Base wallet', type: 'string', placeholder: '0x...' },
+      { key: 'solana', label: 'Solana wallet', type: 'string', placeholder: 'Solana address' },
+      {
+        key: 'callbackUrl',
+        label: 'Callback URL',
+        type: 'string',
+        placeholder: 'https://merchant.example/webhooks/argonpay',
+      },
     ],
     defaults: {
       apiKey: '',
       bep20: '',
+      polygon: '',
+      base: '',
       solana: '',
-      ton: '',
-      usdtTon: '',
-      BSCpayAddress: '',
-      usdtTONPayAddress: '',
+      callbackUrl: '',
     },
-  },
-  payment: {
-    kind: 'graphql',
-    operationName: 'Payment',
-    query: `mutation Payment($apiKey: String!, $amount: Float!) {
-  payment(apiKey: $apiKey, amount: $amount) {
-    code
-    message
-    transactionId
-    paymentLink
-    custodian {
-      bep20
-      solana
-      usdtTon
-      ton
-    }
-  }
-}`,
-    fields: [
-      API_KEY_FIELD,
-      { key: 'amount', label: 'Amount (USDT)', type: 'number', required: true, placeholder: '15' },
-    ],
-    defaults: { apiKey: '', amount: 15 },
-  },
-  'start-bsc-payment': {
-    kind: 'graphql',
-    operationName: 'StartBSCPayment',
-    query: `mutation StartBSCPayment($transactionId: String!, $network: String!) {
-  startBSCPayment(transactionId: $transactionId, network: $network) {
-    code
-    message
-    transaction {
-      transactionId
-      amount
-      amountInToken
-      network
-      payAddress
-      recipientAddress
-      status
-      adminTransferred
-    }
-  }
-}`,
-    fields: [
-      { key: 'transactionId', label: 'Transaction ID', type: 'string', required: true },
-      { key: 'network', label: 'Network', type: 'string', required: true, placeholder: 'bep20' },
-    ],
-    defaults: { transactionId: '', network: 'bep20' },
-  },
-  'start-sol-payment': {
-    kind: 'graphql',
-    operationName: 'StartSOLPayment',
-    query: `mutation StartSOLPayment($transactionId: String!) {
-  startSOLPayment(transactionId: $transactionId) {
-    code
-    message
-    transaction {
-      transactionId
-      amount
-      amountInToken
-      network
-      payAddress
-      recipientAddress
-      status
-      adminTransferred
-    }
-  }
-}`,
-    fields: [{ key: 'transactionId', label: 'Transaction ID', type: 'string', required: true }],
-    defaults: { transactionId: '' },
-  },
-  'start-ton-payment': {
-    kind: 'graphql',
-    operationName: 'StartTONPayment',
-    query: `mutation StartTONPayment($transactionId: String!) {
-  startTONPayment(transactionId: $transactionId) {
-    code
-    message
-    transaction {
-      transactionId
-      amount
-      amountInToken
-      network
-      payAddress
-      recipientAddress
-      status
-      adminTransferred
-    }
-  }
-}`,
-    fields: [{ key: 'transactionId', label: 'Transaction ID', type: 'string', required: true }],
-    defaults: { transactionId: '' },
-  },
-  'manual-mark-as-completed': {
-    kind: 'graphql',
-    operationName: 'ManualMarkAsCompleted',
-    query: `mutation ManualMarkAsCompleted($apiKey: String!, $transactionId: String!) {
-  manualMarkAsCompleted(apiKey: $apiKey, transactionId: $transactionId) {
-    code
-    message
-  }
-}`,
-    fields: [
-      API_KEY_FIELD,
-      { key: 'transactionId', label: 'Transaction ID', type: 'string', required: true },
-    ],
-    defaults: { apiKey: '', transactionId: '' },
-  },
-  'get-queries-left': {
-    kind: 'graphql',
-    operationName: 'GetQueriesLeft',
-    query: `query GetQueriesLeft($apiKey: String!) {
-  getQueriesLeft(apiKey: $apiKey)
-}`,
-    fields: [API_KEY_FIELD],
-    defaults: { apiKey: '' },
   },
   'get-custodian-details': {
     kind: 'graphql',
@@ -341,133 +208,181 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
     code
     message
     custodian {
-      apiKey
-      bep20
-      solana
-      ton
-      usdtTon
+      id
+      wallets {
+        bep20
+        polygon
+        base
+        solana
+      }
+      callbackUrl
+      createdAt
     }
   }
 }`,
     fields: [API_KEY_FIELD],
     defaults: { apiKey: '' },
   },
-  'get-transaction-details': {
+  payment: {
     kind: 'graphql',
-    operationName: 'GetTransactionDetails',
-    query: `query GetTransactionDetails($apiKey: String!, $transactionId: String!) {
-  getTransactionDetails(apiKey: $apiKey, transactionId: $transactionId) {
+    operationName: 'Payment',
+    query: `mutation Payment($apiKey: String!, $amount: Float!) {
+  payment(apiKey: $apiKey, amount: $amount) {
     code
     message
+    paymentLink
     transaction {
-      transactionId
+      txnid
       amount
-      amountInToken
-      payAddress
-      network
-      recipientAddress
       status
-      adminTransferred
+      createdAt
+      expiresAt
     }
   }
 }`,
     fields: [
       API_KEY_FIELD,
-      { key: 'transactionId', label: 'Transaction ID', type: 'string', required: true },
+      { key: 'amount', label: 'Amount', type: 'number', required: true, placeholder: '25.5' },
     ],
-    defaults: { apiKey: '', transactionId: '' },
+    defaults: { apiKey: '', amount: 25.5 },
   },
-  'get-transactions': {
+  'create-payment-rest': {
+    kind: 'rest',
+    method: 'POST',
+    pathTemplate: '/create-payment',
+    fields: [
+      API_KEY_FIELD,
+      { key: 'amount', label: 'Amount', type: 'number', required: true, placeholder: '25.5' },
+    ],
+    defaults: { apiKey: '', amount: 25.5 },
+  },
+  'manual-mark-as-completed': {
     kind: 'graphql',
-    operationName: 'GetTransactions',
-    query: `query GetTransactions(
-  $apiKey: String!,
-  $status: String,
-  $timeRange: String,
-  $sortOrder: String
-) {
-  getTransactions(apiKey: $apiKey, status: $status, timeRange: $timeRange, sortOrder: $sortOrder) {
+    operationName: 'ManualMarkAsCompleted',
+    query: `mutation ManualMarkAsCompleted($apiKey: String!, $txnid: String!) {
+  manualMarkAsCompleted(apiKey: $apiKey, txnid: $txnid) {
     code
     message
-    transactions {
-      transactionId
+    success
+  }
+}`,
+    fields: [
+      API_KEY_FIELD,
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+    ],
+    defaults: { apiKey: '', txnid: '' },
+  },
+  'get-transaction-details': {
+    kind: 'graphql',
+    operationName: 'GetTransactionDetails',
+    query: `query GetTransactionDetails($apiKey: String!, $txnid: String!) {
+  getTransactionDetails(apiKey: $apiKey, txnid: $txnid) {
+    code
+    message
+    transaction {
+      txnid
       amount
       amountInToken
+      token
       network
       status
-      payAddress
-      recipientAddress
-      adminTransferred
+      wallet { address }
+      hash
+      blockchainLink
+      isExpired
+      expiresAt
       createdAt
     }
   }
 }`,
     fields: [
       API_KEY_FIELD,
-      { key: 'status', label: 'Status', type: 'string', placeholder: 'started' },
-      { key: 'timeRange', label: 'Time range', type: 'string', placeholder: '7d' },
-      { key: 'sortOrder', label: 'Sort order', type: 'string', placeholder: 'desc' },
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
     ],
-    defaults: { apiKey: '', status: '', timeRange: '', sortOrder: 'desc' },
+    defaults: { apiKey: '', txnid: '' },
   },
-  'check-admin-untransferred': {
+  'get-transactions': {
     kind: 'graphql',
-    operationName: 'CheckAdminUntransferred',
-    query: `query CheckAdminUntransferred($apiKey: String!, $network: String!) {
-  checkAdminUntransferred(apiKey: $apiKey, network: $network) {
+    operationName: 'GetTransactions',
+    query: `query GetTransactions(
+  $apiKey: String!
+  $status: TransactionStatus
+  $network: Network
+  $timeRange: String
+  $sortOrder: String
+) {
+  getTransactions(
+    apiKey: $apiKey
+    status: $status
+    network: $network
+    timeRange: $timeRange
+    sortOrder: $sortOrder
+  ) {
     code
     message
     transactions {
-      transactionId
+      txnid
       amount
       network
       status
-      payAddress
-      recipientAddress
-      adminTransferred
+      createdAt
+    }
+    apiKey {
+      queriesLeft
     }
   }
 }`,
     fields: [
       API_KEY_FIELD,
-      { key: 'network', label: 'Network', type: 'string', required: true, placeholder: 'bep20' },
+      {
+        key: 'status',
+        label: 'Status',
+        type: 'string',
+        placeholder: 'COMPLETED',
+        help: 'PENDING | STARTED | COMPLETED | EXPIRED | CANCELLED',
+      },
+      {
+        key: 'network',
+        label: 'Network',
+        type: 'string',
+        placeholder: 'BEP20',
+        help: 'BEP20 | POLYGON | BASE | SOL',
+      },
+      { key: 'timeRange', label: 'Time range', type: 'string', placeholder: '24h' },
+      { key: 'sortOrder', label: 'Sort order', type: 'string', placeholder: 'desc' },
     ],
-    defaults: { apiKey: '', network: 'bep20' },
+    defaults: { apiKey: '', status: '', network: '', timeRange: '24h', sortOrder: 'desc' },
   },
-  'check-ton-balance': {
+  'check-admin-untransferred': {
     kind: 'graphql',
-    operationName: 'CheckTONBalance',
-    query: `query CheckTONBalance($apiKey: String!, $transactionId: String!) {
-  checkTONBalance(apiKey: $apiKey, transactionId: $transactionId) {
+    operationName: 'CheckAdminUntransferred',
+    query: `query CheckAdminUntransferred($apiKey: String!, $network: Network!) {
+  checkAdminUntransferred(apiKey: $apiKey, network: $network) {
     code
     message
-    balance
+    transactions {
+      txnid
+      amount
+      network
+      status
+      wallet { address }
+      hash
+      createdAt
+    }
   }
 }`,
     fields: [
       API_KEY_FIELD,
-      { key: 'transactionId', label: 'Transaction ID', type: 'string', required: true },
+      {
+        key: 'network',
+        label: 'Network',
+        type: 'string',
+        required: true,
+        placeholder: 'POLYGON',
+        help: 'BEP20 | POLYGON | BASE | SOL',
+      },
     ],
-    defaults: { apiKey: '', transactionId: '' },
-  },
-  'pay-endpoint': {
-    kind: 'rest',
-    method: 'GET',
-    pathTemplate: '/pay?txnid={txnid}&network={network}',
-    fields: [
-      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true },
-      { key: 'network', label: 'Network', type: 'string', required: true, placeholder: 'bep20' },
-    ],
-    defaults: { txnid: '', network: 'bep20' },
-  },
-  'orders-endpoint': {
-    kind: 'rest',
-    method: 'GET',
-    pathTemplate: '/orders/{transactionId}',
-    fields: [
-      { key: 'transactionId', label: 'Transaction ID', type: 'string', required: true },
-    ],
-    defaults: { transactionId: '' },
+    defaults: { apiKey: '', network: 'POLYGON' },
   },
 }
 
@@ -476,10 +391,11 @@ export function getDocsTryConfig(slug: string): DocsTryConfig | undefined {
 }
 
 export function buildRestPath(
-  template: string,
+  pathTemplate: string,
   values: Record<string, string | number | boolean>
 ): string {
-  return template.replace(/\{(\w+)\}/g, (_, key: string) =>
-    encodeURIComponent(String(values[key] ?? ''))
-  )
+  return pathTemplate.replace(/\{(\w+)\}/g, (_, key: string) => {
+    const value = values[key]
+    return value === undefined || value === null ? '' : encodeURIComponent(String(value))
+  })
 }

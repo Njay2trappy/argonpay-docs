@@ -1,217 +1,75 @@
-# Create custodian account
+# `createCustodianAccount`
 
-The `createCustodianAccount` mutation registers a set of custodial addresses (wallets) for your API key. These wallets will be used to receive and manage crypto payments on supported networks such as BSC, Solana, and TON.
+Registers custodian settlement settings for your API key (one custodian per key). Debits **1 query**.
 
-Each API key can register only one custodian account.
+Use the `CustodianCreateInput` input type.
 
----
+## Endpoint
 
-#### Endpoint
+`POST https://api.argonpay.app/graphql`
 
-URL: `https://api.argonpay.app/graphql`
-Method: `POST`
-Content-Type: `application/json`
-
----
-
-#### Mutation Structure
+## Mutation
 
 ```graphql
-mutation CreateCustodianAccount(
-  $apiKey: String!,
-  $bep20: String,
-  $solana: String,
-  $ton: String,
-  $usdtTon: String,
-  $BSCpayAddress: String,
-  $usdtTONPayAddress: String
-) {
-  createCustodianAccount(
-    apiKey: $apiKey,
-    bep20: $bep20,
-    solana: $solana,
-    ton: $ton,
-    usdtTon: $usdtTon,
-    BSCpayAddress: $BSCpayAddress,
-    usdtTONPayAddress: $usdtTONPayAddress
-  ) {
+mutation CreateCustodianAccount($input: CustodianCreateInput!) {
+  createCustodianAccount(input: $input) {
     code
     message
     custodian {
+      id
       apiKey
-      bep20
-      solana
-      ton
-      usdtTon
+      wallets {
+        bep20
+        polygon
+        base
+        solana
+      }
+      callbackUrl
+      createdAt
+    }
+    apiKey {
+      key
+      queriesLeft
     }
   }
 }
-
 ```
 
----
-
-#### Parameters
+## Input fields
 
 | Name | Type | Required | Description |
 | --- | --- | --- | --- |
-| `apiKey` | String | ✅ | Your existing API key |
-| `bep20` | String | ❌ | Public wallet for BEP20 USDT |
-| `solana` | String | ❌ | Public Solana wallet address |
-| `ton` | String | ❌ | Public TON wallet address |
-| `usdtTon` | String | ❌ | Public Jetton (USDT on TON) wallet address |
-| `BSCpayAddress` | String | ✅ | Private key of USDT-BEP20 wallet (used for payment ops) |
-| `usdtTONPayAddress` | String | ✅ | Private key of Jetton wallet (used for payment ops) |
+| `apiKey` | `String!` | Yes | Your API key |
+| `wallets` | `CustodianWalletsInput` | No | Public settlement addresses |
+| `wallets.bep20` | `String` | No | BEP20 settlement address |
+| `wallets.polygon` | `String` | No | Polygon settlement address |
+| `wallets.base` | `String` | No | Base settlement address |
+| `wallets.solana` | `String` | No | Solana settlement address |
+| `callbackUrl` | `String` | No | HTTPS webhook URL for payment notifications |
+| `adminKeys` | `CustodianAdminKeysInput` | No | Advanced settlement configuration (server-side only; do not expose in clients) |
+| `privateKey` | `String` | No | Advanced settlement configuration (server-side only; do not expose in clients) |
 
-> 🔐 Private keys are encrypted and stored securely on the server. The PrivateKey is only required for Admin Transfers.
-
----
-
-#### Successful Response
+## Example variables (public fields)
 
 ```json
 {
-  "data": {
-    "createCustodianAccount": {
-      "code": 200,
-      "message": "Custodian account successfully created.",
-      "custodian": {
-        "apiKey": "your-api-key",
-        "bep20": "0xPublicAddress...",
-        "solana": "So1anaAddress...",
-        "ton": "EQDw...",
-        "usdtTon": "EQB..."
-      }
-    }
+  "input": {
+    "apiKey": "YOUR_API_KEY",
+    "wallets": {
+      "bep20": "0xYourBep20Address",
+      "polygon": "0xYourPolygonAddress",
+      "base": "0xYourBaseAddress",
+      "solana": "YourSolanaAddress"
+    },
+    "callbackUrl": "https://merchant.example/webhooks/argonpay"
   }
 }
-
 ```
 
----
+## Errors
 
-#### Error Codes
-
-| Code | Description |
+| Code | Meaning |
 | --- | --- |
-| 200 | Custodian account created successfully |
-| 401 | Invalid API key |
-| 409 | A custodian account already exists for this API key |
-| 500 | Server error during creation |
+| 401 / 402 | Invalid key or query limit |
+| 409 | Custodian already exists for this API key |
 
----
-
-### Code Examples
-
-#### Python 
-
-```python
-import requests
-
-url = "https://api.argonpay.app/graphql"
-headers = {"Content-Type": "application/json"}
-
-query = """
-mutation CreateCustodianAccount(
-  $apiKey: String!,
-  $bep20: String,
-  $solana: String,
-  $ton: String,
-  $usdtTon: String,
-  $BSCpayAddress: String,
-  $usdtTONPayAddress: String
-) {
-  createCustodianAccount(
-    apiKey: $apiKey,
-    bep20: $bep20,
-    solana: $solana,
-    ton: $ton,
-    usdtTon: $usdtTon,
-    BSCpayAddress: $BSCpayAddress,
-    usdtTONPayAddress: $usdtTONPayAddress
-  ) {
-    code
-    message
-    custodian {
-      apiKey
-      bep20
-      solana
-      ton
-      usdtTon
-    }
-  }
-}
-"""
-
-variables = {
-  "apiKey": "your-api-key",
-  "bep20": "0xYourBEP20Wallet",
-  "solana": "YourSolanaAddress",
-  "ton": "YourTONAddress",
-  "usdtTon": "YourJettonWallet",
-  "BSCpayAddress": "0xyourBSCPrivateKey",
-  "usdtTONPayAddress": "yourJettonPrivateKey"
-}
-
-response = requests.post(url, json={"query": query, "variables": variables}, headers=headers)
-print(response.json())
-
-```
-
----
-
-#### JavaScript 
-
-```javascript
-const fetch = require("node-fetch");
-
-const query = `
-mutation CreateCustodianAccount(
-  $apiKey: String!,
-  $bep20: String,
-  $solana: String,
-  $ton: String,
-  $usdtTon: String,
-  $BSCpayAddress: String,
-  $usdtTONPayAddress: String
-) {
-  createCustodianAccount(
-    apiKey: $apiKey,
-    bep20: $bep20,
-    solana: $solana,
-    ton: $ton,
-    usdtTon: $usdtTon,
-    BSCpayAddress: $BSCpayAddress,
-    usdtTONPayAddress: $usdtTONPayAddress
-  ) {
-    code
-    message
-    custodian {
-      apiKey
-      bep20
-      solana
-      ton
-      usdtTon
-    }
-  }
-}`;
-
-const variables = {
-  apiKey: "your-api-key",
-  bep20: "0xYourBEP20Wallet",
-  solana: "YourSolanaAddress",
-  ton: "YourTONAddress",
-  usdtTon: "YourJettonWallet",
-  BSCpayAddress: "0xyourBSCPrivateKey",
-  usdtTONPayAddress: "yourJettonPrivateKey"
-};
-
-fetch("https://api.argonpay.app/graphql", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ query, variables })
-})
-.then(res => res.json())
-.then(data => console.log(data));
-
-```

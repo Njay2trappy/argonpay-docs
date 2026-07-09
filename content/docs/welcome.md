@@ -1,27 +1,43 @@
-# Welcome
+# Argonpay merchant API
 
-ArgonPay is a secure, flexible, and blockchain-powered payment gateway designed for modern applications and platforms that require multi-network cryptocurrency payment handling. Built with developers in mind, ArgonPay offers seamless integration with GraphQL-based APIs, allowing merchants and service providers to accept, monitor, and automate payments across major chains like:
+Argonpay is a multi-chain crypto payment API for merchants. This documentation covers **API key authenticated** GraphQL operations and the matching merchant REST endpoint from Argonpay v2.
 
-- Binance Smart Chain (BEP20 USDT)
-- Solana (SOL)
-- TON (The Open Network)
-- Jetton (USDT on TON)
+## Base URL
 
-#### What ArgonPay Offers
+- GraphQL: `https://api.argonpay.app/graphql`
+- REST: `https://api.argonpay.app`
 
-- API Key-based Access Control: You can create, revoke, and recharge API keys tied to your wallet and usage quotas.
-- Multi-Blockchain Support: Accept payments using multiple token standards with real-time price conversions.
-- Automated Wallet Monitoring: Temporary wallets are generated per transaction and monitored for up to 15 minutes.
-- Custodian Wallet Forwarding: Funds are automatically forwarded to your designated wallet upon successful deposit.
-- Manual Controls: Manual overrides are supported for marking or inspecting transactions.
-- Developer-Friendly: Every function is exposed via a clear, robust GraphQL schema with rich filtering and mutation support.
+## Supported networks
 
-#### Who Is This For?
+| Enum | Network |
+| --- | --- |
+| `BEP20` | BNB Smart Chain |
+| `POLYGON` | Polygon |
+| `BASE` | Base |
+| `SOL` | Solana |
 
-- Crypto-enabled merchants
-- DApp developers
-- SaaS platforms accepting on-chain payments
-- APIs for voucher/gift card stores
-- Any system needing secure, low-fee USDT payment automation
+Stable tokens: `USDT`, `USDC` (where supported by the payment start flow).
 
-ArgonPay abstracts away the blockchain complexity while still giving developers full visibility and control over the transaction lifecycle. Argon is built with zero commissions, which enables your users to enjoy free and fast payments. Merchants tend to get the value for their money as no withdrawal fees are attached to the merchant's returns.
+## Authentication
+
+Merchant operations authenticate by passing your **`apiKey` as a GraphQL argument** (or in the REST JSON body for `POST /create-payment`). There is no `x-api-key` header.
+
+Most authenticated reads and writes debit **1 query** from `queriesLeft`. Exceptions:
+
+| Operation | Debits query? |
+| --- | --- |
+| `getQueriesLeft` | No |
+| `payment` | No (debit happens when a payment is started on-chain) |
+| `rechargeApiKey` | No (adds queries) |
+| Other API-key operations in this docs set | Yes |
+
+## Transaction statuses
+
+`PENDING` · `STARTED` · `COMPLETED` · `EXPIRED` · `CANCELLED`
+
+## What this docs site covers
+
+Only merchant **API key** GraphQL queries/mutations and `POST /create-payment`.
+
+Not documented here: subscriptions, superKey/admin tools, public/guest payment flows, or txnid-only payment start endpoints used by the hosted checkout.
+

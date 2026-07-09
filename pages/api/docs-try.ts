@@ -9,6 +9,7 @@ type TryBody = {
   operationName?: string
   method?: string
   path?: string
+  body?: Record<string, unknown>
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -76,9 +77,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'A valid relative REST path is required' })
     }
 
+    const restBody = isPlainObject(body.body) ? body.body : undefined
     const upstream = await fetch(`${backend}${path}`, {
       method,
       headers: { 'Content-Type': 'application/json' },
+      body: method === 'GET' || method === 'DELETE' ? undefined : JSON.stringify(restBody || {}),
     })
 
     const text = await upstream.text()

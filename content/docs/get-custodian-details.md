@@ -1,18 +1,12 @@
-# Get custodian details
+# `getCustodianDetails`
 
-The `getCustodianDetails` query allows you to fetch the public wallet addresses (BEP20, Solana, TON, USDT-TON) linked to your API key. This helps you confirm that your custodian wallets are correctly registered.
+Fetches custodian configuration for your API key. Debits **1 query**.
 
----
+## Endpoint
 
-#### Endpoint
+`POST https://api.argonpay.app/graphql`
 
-URL: `https://api.argonpay.app/graphql`
-Method: `POST`
-Content-Type: `application/json`
-
----
-
-#### Query Structure
+## Query
 
 ```graphql
 query GetCustodianDetails($apiKey: String!) {
@@ -20,128 +14,36 @@ query GetCustodianDetails($apiKey: String!) {
     code
     message
     custodian {
+      id
       apiKey
-      bep20
-      solana
-      ton
-      usdtTon
+      wallets {
+        bep20
+        polygon
+        base
+        solana
+      }
+      callbackUrl
+      createdAt
     }
   }
 }
-
 ```
 
----
+## Arguments
 
-#### Parameters
+| Name | Type | Required |
+| --- | --- | --- |
+| `apiKey` | `String!` | Yes |
 
-| Name | Type | Required | Description |
-| --- | --- | --- | --- |
-| `apiKey` | String | ✅ | Your issued API key |
-
----
-
-#### Successful Response
+## Example variables
 
 ```json
 {
-  "data": {
-    "getCustodianDetails": {
-      "code": 200,
-      "message": "Custodian details retrieved successfully.",
-      "custodian": {
-        "apiKey": "your-api-key",
-        "bep20": "0xYourBEP20Wallet",
-        "solana": "YourSolanaAddress",
-        "ton": "YourTONAddress",
-        "usdtTon": "YourJettonWallet"
-      }
-    }
-  }
+  "apiKey": "YOUR_API_KEY"
 }
-
 ```
 
----
+## Note
 
-#### Error Codes
+The GraphQL `Custodian` type may include sensitive settlement fields. Prefer requesting only public wallet addresses and `callbackUrl` in production clients, as shown above.
 
-| Code | Description |
-| --- | --- |
-| 200 | Success |
-| 401 | Invalid or expired API key |
-| 404 | No custodian details found for the API key |
-| 500 | Internal server error |
-
----
-
-### Code Examples
-
-#### Python Example
-
-```python
-import requests
-
-url = "https://api.argonpay.app/graphql"
-headers = {"Content-Type": "application/json"}
-
-query = """
-query GetCustodianDetails($apiKey: String!) {
-  getCustodianDetails(apiKey: $apiKey) {
-    code
-    message
-    custodian {
-      apiKey
-      bep20
-      solana
-      ton
-      usdtTon
-    }
-  }
-}
-"""
-
-variables = {
-  "apiKey": "your-api-key"
-}
-
-response = requests.post(url, json={"query": query, "variables": variables}, headers=headers)
-print(response.json())
-
-```
-
----
-
-#### JavaScript Example
-
-```javascript
-const fetch = require("node-fetch");
-
-const query = `
-query GetCustodianDetails($apiKey: String!) {
-  getCustodianDetails(apiKey: $apiKey) {
-    code
-    message
-    custodian {
-      apiKey
-      bep20
-      solana
-      ton
-      usdtTon
-    }
-  }
-}`;
-
-const variables = {
-  apiKey: "your-api-key"
-};
-
-fetch("https://api.argonpay.app/graphql", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ query, variables })
-})
-.then(res => res.json())
-.then(data => console.log(data));
-
-```

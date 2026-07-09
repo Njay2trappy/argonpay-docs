@@ -1,127 +1,47 @@
-# Revoke API key
+# `revokeApiKey`
 
-#### Overview
+Rotates your API key. Requires your current `apiKey` and the **wallet private key** that matches the address registered on the key (`ApiKey.wallet`). Debits **1 query**.
 
-The `revokeApiKey` Mutation allows you to securely revoke your current API key and receive a new one. This is useful when you suspect your current key is compromised or want to rotate credentials periodically.
+## Endpoint
 
----
+`POST https://api.argonpay.app/graphql`
 
-#### Endpoint
-
-URL: `https://api.argonpay.app/graphql`
-Method: `POST`
-Content-Type: `application/json`
-
----
-
-#### Mutation Structure
+## Mutation
 
 ```graphql
-mutation RevokeApiKey($apiKey: String!, $password: String!) {
-  revokeApiKey(apiKey: $apiKey, password: $password) {
+mutation RevokeApiKey($apiKey: String!, $privateKey: String!) {
+  revokeApiKey(apiKey: $apiKey, privateKey: $privateKey) {
     code
     message
     newApiKey
-  }
-}
-
-```
-
----
-
-#### Required Parameters
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `apiKey` | String | Your existing API key |
-| `password` | String | Password used during key registration |
-
----
-
-#### Response Format
-
-```json
-{
-  "data": {
-    "revokeApiKey": {
-      "code": 200,
-      "message": "API key successfully revoked and regenerated.",
-      "newApiKey": "newly-generated-api-key"
+    apiKey {
+      id
+      key
+      wallet
+      queriesLeft
     }
   }
 }
-
 ```
 
----
+## Arguments
 
-#### Error Codes
+| Name | Type | Required | Description |
+| --- | --- | --- | --- |
+| `apiKey` | `String!` | Yes | Current API key |
+| `privateKey` | `String!` | Yes | Private key for the registered wallet address |
 
-| Code | Description |
-| --- | --- |
-| 200 | Success: New API key generated |
-| 401 | Unauthorized: Incorrect password |
-| 404 | Invalid API key or key expired |
-| 500 | Server error during revocation process |
+## Example variables
 
----
-
-### Code Examples
-
-#### Python Example
-
-```python
-import requests
-url = "https://api.argonpay.app/graphql"
-headers = {"Content-Type": "application/json"}
-
-query = """
-mutation RevokeApiKey($apiKey: String!, $password: String!) {
-  revokeApiKey(apiKey: $apiKey, password: $password) {
-    code
-    message
-    newApiKey
-  }
+```json
+{
+  "apiKey": "YOUR_API_KEY",
+  "privateKey": "0xYOUR_WALLET_PRIVATE_KEY"
 }
-"""
-
-variables = {
-  "apiKey": "your-current-api-key",
-  "password": "yourPassword123"
-}
-
-response = requests.post(url, json={"query": query, "variables": variables}, headers=headers)
-print(response.json())
-
 ```
 
----
+## Notes
 
-#### JavaScript Example
+- Store `newApiKey` securely and update your integrations immediately.
+- Do not share private keys in tickets, screenshots, or client apps.
 
-```javascript
-const fetch = require("node-fetch");
-
-const query = `
-mutation RevokeApiKey($apiKey: String!, $password: String!) {
-  revokeApiKey(apiKey: $apiKey, password: $password) {
-    code
-    message
-    newApiKey
-  }
-}`;
-
-const variables = {
-  apiKey: "your-current-api-key",
-  password: "yourPassword123"
-};
-
-fetch("https://api.argonpay.app/graphql", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ query, variables })
-})
-.then(res => res.json())
-.then(data => console.log(data));
-
-```

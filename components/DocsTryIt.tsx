@@ -91,18 +91,35 @@ export default function DocsTryIt({ slug, title }: DocsTryItProps) {
       }
 
       const variables = valuesToVariables(config.fields, values)
+      const graphqlVariables =
+        slug === 'create-custodian-account' || slug === 'update-custodian-details'
+          ? {
+              input: {
+                apiKey: variables.apiKey,
+                wallets: {
+                  ...(variables.bep20 ? { bep20: variables.bep20 } : {}),
+                  ...(variables.polygon ? { polygon: variables.polygon } : {}),
+                  ...(variables.base ? { base: variables.base } : {}),
+                  ...(variables.solana ? { solana: variables.solana } : {}),
+                },
+                ...(variables.callbackUrl ? { callbackUrl: variables.callbackUrl } : {}),
+              },
+            }
+          : variables
+
       const payload =
         config.kind === 'graphql'
           ? {
               kind: 'graphql' as const,
               query: config.query,
               operationName: config.operationName,
-              variables,
+              variables: graphqlVariables,
             }
           : {
               kind: 'rest' as const,
               method: config.method,
               path: buildRestPath(config.pathTemplate, variables),
+              body: variables,
             }
 
       const result = await fetch('/api/docs-try', {
