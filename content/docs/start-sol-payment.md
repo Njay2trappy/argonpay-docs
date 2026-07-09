@@ -48,5 +48,5 @@ mutation StartSOLPayment($txnid: String!) {
 
 ## REST equivalent
 
-`POST https://api.argonpay.app/pay` with body `{ "txnid": "...", "network": "sol" }`
+See [REST start payment](/pay-rest) (`POST /pay` with `network: "sol"`).
 

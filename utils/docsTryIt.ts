@@ -256,6 +256,49 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
     ],
     defaults: { apiKey: '', amount: 25.5 },
   },
+  'pay-rest': {
+    kind: 'rest',
+    method: 'POST',
+    pathTemplate: '/pay',
+    fields: [
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+      {
+        key: 'network',
+        label: 'Network',
+        type: 'string',
+        required: true,
+        placeholder: 'bep20',
+        help: 'bep20, bsc, polygon, matic, base, or sol',
+      },
+      {
+        key: 'token',
+        label: 'Token',
+        type: 'string',
+        required: false,
+        placeholder: 'USDT',
+        help: 'USDT or USDC for EVM networks',
+      },
+    ],
+    defaults: { txnid: '', network: 'bep20', token: 'USDT' },
+  },
+  'cancel-payment-rest': {
+    kind: 'rest',
+    method: 'POST',
+    pathTemplate: '/cancel-payment',
+    fields: [
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+    ],
+    defaults: { txnid: '' },
+  },
+  'get-order-rest': {
+    kind: 'rest',
+    method: 'GET',
+    pathTemplate: '/orders/{txnid}',
+    fields: [
+      { key: 'txnid', label: 'Transaction ID', type: 'string', required: true, placeholder: 'txnid' },
+    ],
+    defaults: { txnid: '' },
+  },
   'manual-mark-as-completed': {
     kind: 'graphql',
     operationName: 'ManualMarkAsCompleted',

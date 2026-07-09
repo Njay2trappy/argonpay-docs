@@ -66,3 +66,6 @@ mutation Payment($apiKey: String!, $amount: Float!) {
 
 Redirect your customer to `paymentLink` to complete network selection and deposit.
 
+## REST equivalent
+
+See [REST create payment](/create-payment-rest) (`POST /create-payment`).

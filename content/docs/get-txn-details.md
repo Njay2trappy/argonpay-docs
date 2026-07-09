@@ -52,5 +52,5 @@ query GetTxnDetails($txnid: String!) {
 
 ## REST equivalent
 
-`GET https://api.argonpay.app/orders/:txnid`
+See [REST get order](/get-order-rest) (`GET /orders/:txnid`).
 

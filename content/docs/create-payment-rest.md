@@ -36,3 +36,6 @@ curl -X POST https://api.argonpay.app/create-payment \
 
 Same logical payload as GraphQL `payment` (sanitized for REST). Use `paymentLink` / `transaction.txnid` from the response.
 
+## GraphQL equivalent
+
+See [Create payment](/payment) (`payment`).

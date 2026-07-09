@@ -51,5 +51,5 @@ mutation StartBasePayment($txnid: String!, $token: StableToken) {
 
 ## REST equivalent
 
-`POST https://api.argonpay.app/pay` with body `{ "txnid": "...", "network": "base", "token": "USDT" }`
+See [REST start payment](/pay-rest) (`POST /pay` with `network: "base"`).
 

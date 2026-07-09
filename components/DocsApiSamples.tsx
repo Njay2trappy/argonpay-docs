@@ -89,7 +89,17 @@ function buildSamples(slug: string, title: string, config: DocsTryConfig, endpoi
   if (config.kind === 'rest') {
     const path = buildRestPath(config.pathTemplate, vars as Record<string, string | number | boolean>)
     const restUrl = `https://api.argonpay.app${path}`
+    const isGet = config.method === 'GET' || config.method === 'DELETE'
     const body = JSON.stringify(vars, null, 2)
+    if (isGet) {
+      return {
+        curl: `curl --request ${config.method} \\\n  --url '${restUrl}'`,
+        javascript: `const response = await fetch('${restUrl}', {\n  method: '${config.method}'\n})\n\nconst data = await response.json()\nconsole.log(data)`,
+        python: `import requests\n\nurl = "${restUrl}"\n\nresponse = requests.${config.method.toLowerCase()}(url)\nprint(response.json())`,
+        graphql: `// REST endpoint — no GraphQL body\n${config.method} ${path}`,
+        title,
+      }
+    }
     return {
       curl: `curl --request ${config.method} \\\n  --url '${restUrl}' \\\n  --header 'Content-Type: application/json' \\\n  --data '${escapeShell(JSON.stringify(vars))}'`,
       javascript: `const response = await fetch('${restUrl}', {\n  method: '${config.method}',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify(${body})\n})\n\nconst data = await response.json()\nconsole.log(data)`,
@@ -315,7 +325,10 @@ export default function DocsApiSamples({
               kind: 'rest' as const,
               method: config.method,
               path: buildRestPath(config.pathTemplate, variables),
-              body: variables,
+              body:
+                config.method === 'GET' || config.method === 'DELETE'
+                  ? undefined
+                  : variables,
             }
 
       const result = await fetch('/api/docs-try', {

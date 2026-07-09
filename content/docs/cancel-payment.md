@@ -42,5 +42,5 @@ mutation CancelPayment($txnid: String!) {
 
 ## REST equivalent
 
-`POST https://api.argonpay.app/cancel-payment` with body `{ "txnid": "..." }`
+See [REST cancel payment](/cancel-payment-rest) (`POST /cancel-payment`).
 
