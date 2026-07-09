@@ -1,4 +1,6 @@
-# `getQueriesLeft`
+# Get queries left
+
+> Return the remaining query balance for an API key without debiting a query.
 
 Returns the remaining query balance for your API key. **Does not debit** a query.
 

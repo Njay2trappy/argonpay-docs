@@ -1,4 +1,6 @@
-# `startSOLPayment`
+# Start SOL payment
+
+> Start monitoring a pending payment on Solana.
 
 Starts a pending payment on **Solana** (native SOL). Debits **1 query** from the transaction owner's API key when started.
 

@@ -1,4 +1,6 @@
-# Argonpay merchant API
+# Welcome
+
+> Overview of the Argonpay merchant GraphQL API and payment flow.
 
 Argonpay is a multi-chain crypto payment API for merchants. This documentation covers merchant GraphQL operations and REST helpers from Argonpay v2.
 

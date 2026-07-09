@@ -1,4 +1,6 @@
-# `updateCustodianDetails`
+# Update custodian details
+
+> Partially update custodian settlement wallets and callback URL.
 
 Partially updates custodian settings. Only provided fields change. Debits **1 query**.
 

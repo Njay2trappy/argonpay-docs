@@ -1,5 +1,7 @@
 # Authentication
 
+> Authenticate merchant GraphQL and REST requests with an API key argument.
+
 ## How it works
 
 Pass your API key as the `apiKey` argument on each GraphQL operation:

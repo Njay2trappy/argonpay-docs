@@ -1,4 +1,6 @@
-# `createCustodianAccount`
+# Create custodian account
+
+> Register settlement wallets and callback settings for an API key.
 
 Registers custodian settlement settings for your API key (one custodian per key). Debits **1 query**.
 

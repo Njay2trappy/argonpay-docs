@@ -1,4 +1,6 @@
-# `cancelPayment`
+# Cancel payment
+
+> Cancel a payment that has not already been finalized.
 
 Cancels a payment that is not already finalized (`completed`, `expired`, or `cancelled`). Takes `txnid` only.
 

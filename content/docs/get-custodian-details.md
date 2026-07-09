@@ -1,4 +1,6 @@
-# `getCustodianDetails`
+# Get custodian details
+
+> Fetch custodian configuration for the authenticated API key.
 
 Fetches custodian configuration for your API key. Debits **1 query**.
 

@@ -1,4 +1,6 @@
-# `rechargeApiKey`
+# Recharge API key
+
+> Purchase additional query units by signing a BEP20 USDT transfer.
 
 Adds query units to your API key after an on-chain USDT (BEP20) payment signed with your wallet private key. **Does not debit** queries; it increases `queriesLeft`.
 

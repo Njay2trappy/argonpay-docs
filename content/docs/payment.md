@@ -1,4 +1,6 @@
-# `payment`
+# Create payment
+
+> Create a pending payment and return a hosted checkout payment link.
 
 Creates a pending merchant payment and returns a hosted `paymentLink`. Requires an existing custodian for the API key.
 

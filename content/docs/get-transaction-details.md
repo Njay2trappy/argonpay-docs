@@ -1,4 +1,6 @@
-# `getTransactionDetails`
+# Get transaction details
+
+> Fetch a single transaction owned by the authenticated API key.
 
 Fetches a single transaction owned by your API key. Debits **1 query**.
 

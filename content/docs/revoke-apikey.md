@@ -1,4 +1,6 @@
-# `revokeApiKey`
+# Revoke API key
+
+> Rotate an API key after verifying ownership with the registered wallet private key.
 
 Rotates your API key. Requires your current `apiKey` and the **wallet private key** that matches the address registered on the key (`ApiKey.wallet`). Debits **1 query**.
 

@@ -1,4 +1,6 @@
-# `checkAdminUntransferred`
+# Check untransferred
+
+> List started/completed transactions that have not yet been settlement-swept.
 
 Returns transactions on a network that are started/completed but not yet marked as admin-transferred (settlement sweep pending). Authenticated with your merchant **API key** (not a super key). Debits **1 query**.
 

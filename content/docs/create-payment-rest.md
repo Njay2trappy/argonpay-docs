@@ -1,4 +1,6 @@
-# `POST /create-payment`
+# REST create payment
+
+> REST equivalent of the GraphQL payment mutation.
 
 Merchant REST equivalent of the GraphQL `payment` mutation. Requires `apiKey` in the JSON body.
 

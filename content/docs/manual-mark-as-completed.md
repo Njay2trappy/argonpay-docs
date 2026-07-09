@@ -1,4 +1,6 @@
-# `manualMarkAsCompleted`
+# Manual mark completed
+
+> Manually mark a merchant transaction as completed.
 
 Manually marks a merchant transaction as `COMPLETED`. Debits **1 query**.
 

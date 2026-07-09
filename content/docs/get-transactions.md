@@ -1,4 +1,6 @@
-# `getTransactions`
+# List transactions
+
+> List merchant transactions with optional status, network, and time filters.
 
 Lists transactions for your API key with optional filters. Debits **1 query**.
 

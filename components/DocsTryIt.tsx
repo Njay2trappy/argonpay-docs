@@ -9,6 +9,7 @@ import {
 type DocsTryItProps = {
   slug: string
   title: string
+  compact?: boolean
 }
 
 type TryResponse = {
@@ -54,7 +55,7 @@ function defaultsToStrings(config: DocsTryConfig): Record<string, string> {
   return next
 }
 
-export default function DocsTryIt({ slug, title }: DocsTryItProps) {
+export default function DocsTryIt({ slug, title, compact = false }: DocsTryItProps) {
   const config = useMemo(() => getDocsTryConfig(slug), [slug])
   const [values, setValues] = useState<Record<string, string>>({})
   const [isOpen, setIsOpen] = useState(true)
@@ -145,29 +146,33 @@ export default function DocsTryIt({ slug, title }: DocsTryItProps) {
     : ''
 
   return (
-    <section className="docs-try" aria-label={`Try ${title}`}>
+    <section className={`docs-try${compact ? ' is-compact' : ''}`} aria-label={`Try ${title}`}>
       <div className="docs-try-head">
         <div>
-          <p className="docs-try-eyebrow">Test environment</p>
-          <h2>Try it now</h2>
-          <p className="docs-try-copy">
-            Send a live request for <strong>{title}</strong> through Argon&apos;s API. Use your own
-            credentials — private keys and API keys stay in this request only.
-          </p>
+          <p className="docs-try-eyebrow">{compact ? 'Live request' : 'Test environment'}</p>
+          <h2>{compact ? 'Try it' : 'Try it now'}</h2>
+          {!compact ? (
+            <p className="docs-try-copy">
+              Send a live request for <strong>{title}</strong> through Argon&apos;s API. Use your own
+              credentials — private keys and API keys stay in this request only.
+            </p>
+          ) : null}
         </div>
-        <button
-          type="button"
-          className="docs-try-toggle"
-          onClick={() => setIsOpen((open) => !open)}
-          aria-expanded={isOpen}
-        >
-          {isOpen ? 'Hide' : 'Show'}
-        </button>
+        {!compact ? (
+          <button
+            type="button"
+            className="docs-try-toggle"
+            onClick={() => setIsOpen((open) => !open)}
+            aria-expanded={isOpen}
+          >
+            {isOpen ? 'Hide' : 'Show'}
+          </button>
+        ) : null}
       </div>
 
       {isOpen ? (
         <form className="docs-try-body" onSubmit={handleSubmit}>
-          <div className="docs-try-grid">
+          <div className={`docs-try-grid${compact ? ' is-stack' : ''}`}>
             <div className="docs-try-fields">
               {config.fields.map((field) => (
                 <label key={field.key} className="docs-try-field">
@@ -219,7 +224,9 @@ export default function DocsTryIt({ slug, title }: DocsTryItProps) {
               <pre className="docs-try-output">
                 <code>
                   {responseText ||
-                    'Fill the fields and click Send request to see the live API response here.'}
+                    (compact
+                      ? 'Response will appear here.'
+                      : 'Fill the fields and click Send request to see the live API response here.')}
                 </code>
               </pre>
             </div>

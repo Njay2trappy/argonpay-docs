@@ -1,4 +1,6 @@
-# `startBasePayment`
+# Start Base payment
+
+> Start monitoring a pending payment on Base.
 
 Starts a pending payment on **Base**. Debits **1 query** from the transaction owner's API key when started.
 

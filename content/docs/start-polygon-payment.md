@@ -1,4 +1,6 @@
-# `startPolygonPayment`
+# Start Polygon payment
+
+> Start monitoring a pending payment on Polygon.
 
 Starts a pending payment on **Polygon**. Debits **1 query** from the transaction owner's API key when started.
 

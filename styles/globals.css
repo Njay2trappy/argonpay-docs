@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:ital,wght@0,300;0,600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
 @import './loader-success.css';
 
@@ -1530,12 +1531,12 @@ body{
 .page-progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),#9b4bff);animation:progressFill 3s ease-in-out forwards;z-index:9999}
 @keyframes progressFill{0%{width:0}50%{width:80%}100%{width:100%}}
 
-/* Docs pages */
+/* Docs pages — Bachs / Mintlify-inspired API reference */
 .docs-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: #fafafa;
 }
 
 .docs-main {
@@ -1543,13 +1544,17 @@ body{
 }
 
 .docs-shell {
-  max-width: 1180px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 72px 24px 96px;
+  padding: 40px 24px 96px;
   display: grid;
-  grid-template-columns: 250px minmax(0, 1fr);
-  gap: 48px;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 40px;
   align-items: start;
+}
+
+.docs-shell.is-api-ref {
+  max-width: 1400px;
 }
 
 .docs-sidebar {
@@ -1947,6 +1952,11 @@ body{
 
 .docs-panel {
   min-width: 0;
+  background: #ffffff;
+  border: 1px solid #ececec;
+  border-radius: 16px;
+  padding: 28px 28px 36px;
+  box-shadow: 0 1px 0 rgba(17, 17, 17, 0.03);
 }
 
 .docs-head {
@@ -1954,18 +1964,18 @@ body{
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 36px;
-  padding-bottom: 28px;
-  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .docs-eyebrow {
   margin: 0;
   color: #8a8a8a;
   font-family: 'Sora', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   line-height: 1.4;
 }
@@ -1974,10 +1984,148 @@ body{
   margin: 0;
   color: #111111;
   font-family: 'Clash Display', sans-serif;
-  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-size: clamp(26px, 3.5vw, 34px);
   font-weight: 500;
-  letter-spacing: -1.2px;
-  line-height: 1.1;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+
+.docs-summary {
+  margin: 0;
+  max-width: 62ch;
+  color: #5c5c5c;
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.55;
+}
+
+.docs-endpoint-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  background: #f7f7f8;
+}
+
+.docs-endpoint-path {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  color: #1f1f1f;
+  font-family: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.docs-endpoint-op {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffffff;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.docs-body.is-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.docs-content {
+  min-width: 0;
+}
+
+.docs-examples {
+  position: sticky;
+  top: 96px;
+  min-width: 0;
+}
+
+.docs-try.is-compact {
+  margin: 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: #0f1115;
+  border-color: #1c212b;
+  color: #e8e8e8;
+}
+
+.docs-try.is-compact .docs-try-eyebrow {
+  color: #9aa3b2;
+}
+
+.docs-try.is-compact .docs-try-head h2 {
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.docs-try.is-compact .docs-try-field > span,
+.docs-try.is-compact .docs-try-endpoint,
+.docs-try.is-compact .docs-try-result-head,
+.docs-try.is-compact .docs-try-meta {
+  color: #9aa3b2;
+}
+
+.docs-try.is-compact .docs-try-field input {
+  background: #161b22;
+  border-color: #2a3340;
+  color: #f3f4f6;
+}
+
+.docs-try.is-compact .docs-try-field input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+.docs-try.is-compact .docs-try-field small {
+  color: #7b8494;
+}
+
+.docs-try.is-compact .docs-try-result {
+  background: #12161d;
+  border-color: #2a3340;
+}
+
+.docs-try.is-compact .docs-try-output {
+  color: #d7dde7;
+  background: transparent;
+}
+
+.docs-try.is-compact .docs-try-send {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.docs-try.is-compact .docs-try-send:hover:not(:disabled) {
+  background: #6d28d9;
+}
+
+.docs-try-grid.is-stack {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 1100px) {
+  .docs-body.is-split {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-examples {
+    position: static;
+  }
 }
 
 .docs-markdown {

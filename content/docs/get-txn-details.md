@@ -1,4 +1,6 @@
-# `getTxnDetails`
+# Get txn details
+
+> Look up a payment by txnid for hosted checkout and order status.
 
 Looks up a payment by `txnid`. Used by the hosted checkout and order status pages. No `apiKey` argument — anyone with the `txnid` can read the public transaction fields.
 
