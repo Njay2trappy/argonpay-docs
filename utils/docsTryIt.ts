@@ -95,28 +95,29 @@ export function inputKindLabel(field: DocsTryField): string {
 }
 
 export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
-  'get-queries-left': {
+  'get-credits-left': {
     kind: 'graphql',
-    operationName: 'GetQueriesLeft',
-    query: `query GetQueriesLeft($apiKey: String!) {
-  getQueriesLeft(apiKey: $apiKey) {
+    operationName: 'GetCreditsLeft',
+    query: `query GetCreditsLeft($apiKey: String!) {
+  getCreditsLeft(apiKey: $apiKey) {
     code
     message
-    queriesLeft
+    creditsLeft
     apiKey {
-      queriesLeft
+      key
+      creditsLeft
       wallet
-      email
+      userId
     }
   }
 }`,
     fields: [API_KEY_FIELD],
     responseFields: [
       ...COMMON_RESULT_FIELDS,
-      { path: 'queriesLeft', valueType: 'Int', description: 'Remaining query balance for the API key.' },
-      { path: 'apiKey.queriesLeft', valueType: 'Int', description: 'Same remaining balance on the API key object.' },
+      { path: 'creditsLeft', valueType: 'Int', description: 'Remaining credit balance for the API key.' },
+      { path: 'apiKey.creditsLeft', valueType: 'Int', description: 'Same remaining balance on the API key object.' },
       { path: 'apiKey.wallet', valueType: 'String', description: 'Registered wallet address string.' },
-      { path: 'apiKey.email', valueType: 'String', description: 'Merchant email string on the API key.' },
+      { path: 'apiKey.key', valueType: 'String', description: 'API key string.' },
     ],
     defaults: { apiKey: '' },
   },
@@ -131,7 +132,7 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
     apiKey {
       key
       wallet
-      queriesLeft
+      creditsLeft
     }
   }
 }`,
@@ -152,45 +153,11 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
       { path: 'newApiKey', valueType: 'String', description: 'Rotated API key string to store securely.' },
       { path: 'apiKey.key', valueType: 'String', description: 'Current key value after rotation.' },
       { path: 'apiKey.wallet', valueType: 'String', description: 'Registered wallet address string.' },
-      { path: 'apiKey.queriesLeft', valueType: 'Int', description: 'Remaining query balance.' },
+      { path: 'apiKey.creditsLeft', valueType: 'Int', description: 'Remaining credit balance.' },
     ],
     defaults: { apiKey: '', privateKey: '' },
   },
-  'recharge-apikey': {
-    kind: 'graphql',
-    operationName: 'RechargeApiKey',
-    query: `mutation RechargeApiKey($apiKey: String!, $privateKey: String!, $unit: Int!) {
-  rechargeApiKey(apiKey: $apiKey, privateKey: $privateKey, unit: $unit) {
-    code
-    message
-    newBalance
-    apiKey {
-      queriesLeft
-      wallet
-    }
-  }
-}`,
-    fields: [
-      API_KEY_FIELD,
-      {
-        key: 'privateKey',
-        label: 'Wallet private key',
-        type: 'password',
-        valueType: 'String!',
-        required: true,
-        placeholder: '0x...',
-        help: 'Hex private key string used to sign the recharge transfer.',
-      },
-      { key: 'unit', label: 'Units', type: 'number', valueType: 'Int!', required: true, placeholder: '100', help: 'Integer number of query units to purchase.' },
-    ],
-    responseFields: [
-      ...COMMON_RESULT_FIELDS,
-      { path: 'newBalance', valueType: 'Int', description: 'Updated query balance after recharge.' },
-      { path: 'apiKey.queriesLeft', valueType: 'Int', description: 'Remaining query balance on the key.' },
-      { path: 'apiKey.wallet', valueType: 'String', description: 'Registered wallet address string.' },
-    ],
-    defaults: { apiKey: '', privateKey: '', unit: 100 },
-  },
+
   'create-custodian-account': {
     kind: 'graphql',
     operationName: 'CreateCustodianAccount',
@@ -210,7 +177,7 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
       createdAt
     }
     apiKey {
-      queriesLeft
+      creditsLeft
     }
   }
 }`,
@@ -238,7 +205,7 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
       { path: 'custodian.wallets.solana', valueType: 'String', description: 'Solana settlement address.' },
       { path: 'custodian.callbackUrl', valueType: 'String', description: 'Configured webhook URL.' },
       { path: 'custodian.createdAt', valueType: 'String', description: 'ISO-8601 creation timestamp.' },
-      { path: 'apiKey.queriesLeft', valueType: 'Int', description: 'Remaining query balance after the call.' },
+      { path: 'apiKey.creditsLeft', valueType: 'Int', description: 'Remaining query balance after the call.' },
     ],
     defaults: {
       apiKey: '',
@@ -267,7 +234,7 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
       callbackUrl
     }
     apiKey {
-      queriesLeft
+      creditsLeft
     }
   }
 }`,
@@ -294,7 +261,7 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
       { path: 'custodian.wallets.base', valueType: 'String', description: 'Base settlement address.' },
       { path: 'custodian.wallets.solana', valueType: 'String', description: 'Solana settlement address.' },
       { path: 'custodian.callbackUrl', valueType: 'String', description: 'Configured webhook URL.' },
-      { path: 'apiKey.queriesLeft', valueType: 'Int', description: 'Remaining query balance after the call.' },
+      { path: 'apiKey.creditsLeft', valueType: 'Int', description: 'Remaining query balance after the call.' },
     ],
     defaults: {
       apiKey: '',
@@ -411,26 +378,18 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
         placeholder: 'USDT',
         help: 'Optional stable token string: USDT or USDC (EVM networks only).',
       },
+      {
+        key: 'apiKey',
+        label: 'API key',
+        type: 'password',
+        valueType: 'String',
+        required: false,
+        placeholder: 'YOUR_API_KEY',
+        help: 'Optional — uses unified StartPayment when provided.',
+      },
     ],
     responseFields: TRANSACTION_RESPONSE_FIELDS,
-    defaults: { txnid: '', network: 'bep20', token: 'USDT' },
-  },
-  'cancel-payment-rest': {
-    kind: 'rest',
-    method: 'POST',
-    pathTemplate: '/cancel-payment',
-    fields: [
-      TXNID_FIELD,
-    ],
-    responseFields: [
-      ...COMMON_RESULT_FIELDS,
-      { path: 'transaction.txnid', valueType: 'String', description: 'Cancelled payment identifier.' },
-      { path: 'transaction.amount', valueType: 'Float', description: 'Payment amount.' },
-      { path: 'transaction.status', valueType: 'TransactionStatus', description: 'Updated status, typically CANCELLED.' },
-      { path: 'transaction.network', valueType: 'Network', description: 'Network enum if already selected.' },
-      { path: 'transaction.createdAt', valueType: 'String', description: 'ISO-8601 creation timestamp.' },
-    ],
-    defaults: { txnid: '' },
+    defaults: { txnid: '', network: 'bep20', token: 'USDT', apiKey: '' },
   },
   'get-order-rest': {
     kind: 'rest',
@@ -441,26 +400,6 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
     ],
     responseFields: TRANSACTION_RESPONSE_FIELDS,
     defaults: { txnid: '' },
-  },
-  'manual-mark-as-completed': {
-    kind: 'graphql',
-    operationName: 'ManualMarkAsCompleted',
-    query: `mutation ManualMarkAsCompleted($apiKey: String!, $txnid: String!) {
-  manualMarkAsCompleted(apiKey: $apiKey, txnid: $txnid) {
-    code
-    message
-    success
-  }
-}`,
-    fields: [
-      API_KEY_FIELD,
-      TXNID_FIELD,
-    ],
-    responseFields: [
-      ...COMMON_RESULT_FIELDS,
-      { path: 'success', valueType: 'Boolean', description: 'Whether the transaction was marked completed.' },
-    ],
-    defaults: { apiKey: '', txnid: '' },
   },
   'get-transaction-details': {
     kind: 'graphql',
@@ -519,7 +458,7 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
       createdAt
     }
     apiKey {
-      queriesLeft
+      creditsLeft
     }
   }
 }`,
@@ -552,7 +491,7 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
       { path: 'transactions[].network', valueType: 'Network', description: 'Network enum for the payment.' },
       { path: 'transactions[].status', valueType: 'TransactionStatus', description: 'Current transaction status.' },
       { path: 'transactions[].createdAt', valueType: 'String', description: 'ISO-8601 creation timestamp.' },
-      { path: 'apiKey.queriesLeft', valueType: 'Int', description: 'Remaining query balance after the call.' },
+      { path: 'apiKey.creditsLeft', valueType: 'Int', description: 'Remaining query balance after the call.' },
     ],
     defaults: { apiKey: '', status: '', network: '', timeRange: '24h', sortOrder: 'desc' },
   },
@@ -628,6 +567,54 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
     ],
     responseFields: TRANSACTION_RESPONSE_FIELDS,
     defaults: { txnid: '' },
+  },
+  'start-payment': {
+    kind: 'graphql',
+    operationName: 'StartPayment',
+    query: `mutation StartPayment($txnid: String!, $network: Network!, $token: StableToken, $apiKey: String) {
+  StartPayment(txnid: $txnid, network: $network, token: $token, apiKey: $apiKey) {
+    code
+    message
+    transaction {
+      txnid
+      amount
+      network
+      status
+      wallet { address }
+      expiresAt
+    }
+  }
+}`,
+    fields: [
+      TXNID_FIELD,
+      {
+        key: 'network',
+        label: 'Network',
+        type: 'string',
+        valueType: 'Network!',
+        required: true,
+        placeholder: 'BEP20',
+        help: 'GraphQL enum: BEP20, POLYGON, BASE, or SOL.',
+      },
+      {
+        key: 'token',
+        label: 'Token',
+        type: 'string',
+        valueType: 'StableToken',
+        placeholder: 'USDT',
+        help: 'Optional: USDT or USDC.',
+      },
+      {
+        key: 'apiKey',
+        label: 'API key',
+        type: 'password',
+        valueType: 'String',
+        placeholder: 'YOUR_API_KEY',
+        help: 'Optional when using Bearer auth.',
+      },
+    ],
+    responseFields: TRANSACTION_RESPONSE_FIELDS,
+    defaults: { txnid: '', network: 'BEP20', token: 'USDT', apiKey: '' },
   },
   'start-bsc-payment': {
     kind: 'graphql',
@@ -788,6 +775,160 @@ export const DOCS_TRY_IT: Record<string, DocsTryConfig> = {
       { path: 'transaction.createdAt', valueType: 'String', description: 'ISO-8601 creation timestamp.' },
     ],
     defaults: { txnid: '' },
+  },
+  'get-public-txns': {
+    kind: 'graphql',
+    operationName: 'GetPublicTXNs',
+    query: `query GetPublicTXNs($cookie: String!) {
+  getPublicTXNs(cookie: $cookie) {
+    code
+    message
+    transactions {
+      txnid
+      amount
+      network
+      status
+      wallet { address }
+      createdAt
+    }
+  }
+}`,
+    fields: [{
+      key: 'cookie',
+      label: 'Cookie',
+      type: 'string',
+      valueType: 'String!',
+      required: true,
+      placeholder: 'guest-cookie-id',
+      help: 'Guest browser cookie identifier.',
+    }],
+    responseFields: [
+      ...COMMON_RESULT_FIELDS,
+      { path: 'transactions', valueType: '[PublicTransaction]', description: 'Guest transactions for the cookie.' },
+    ],
+    defaults: { cookie: '' },
+  },
+  'get-donate': {
+    kind: 'graphql',
+    operationName: 'GetDonate',
+    query: `query GetDonate($campaignId: ID!) {
+  getDonate(campaignId: $campaignId) {
+    code
+    message
+    donate {
+      campaignId
+      reason
+      status
+      raised
+      custodianName
+    }
+  }
+}`,
+    fields: [{
+      key: 'campaignId',
+      label: 'Campaign ID',
+      type: 'string',
+      valueType: 'ID!',
+      required: true,
+      placeholder: 'campaign-id',
+      help: 'Donation campaign identifier.',
+    }],
+    responseFields: [
+      ...COMMON_RESULT_FIELDS,
+      { path: 'donate.campaignId', valueType: 'ID', description: 'Campaign identifier.' },
+      { path: 'donate.reason', valueType: 'String', description: 'Campaign description.' },
+      { path: 'donate.raised', valueType: 'Float', description: 'Total raised amount.' },
+    ],
+    defaults: { campaignId: '' },
+  },
+  'start-donate-payment': {
+    kind: 'graphql',
+    operationName: 'StartDonatePayment',
+    query: `mutation StartDonatePayment($campaignId: ID!, $amount: Float!) {
+  startDonatePayment(campaignId: $campaignId, amount: $amount) {
+    code
+    message
+    paymentLink
+    transaction { txnid amount status }
+  }
+}`,
+    fields: [
+      { key: 'campaignId', label: 'Campaign ID', type: 'string', valueType: 'ID!', required: true, placeholder: 'campaign-id', help: 'Donation campaign ID.' },
+      { key: 'amount', label: 'Amount', type: 'number', valueType: 'Float!', required: true, placeholder: '10', help: 'Donation amount.' },
+    ],
+    responseFields: [
+      ...COMMON_RESULT_FIELDS,
+      { path: 'paymentLink', valueType: 'String', description: 'Hosted checkout URL.' },
+      { path: 'transaction.txnid', valueType: 'String', description: 'Created transaction ID.' },
+    ],
+    defaults: { campaignId: '', amount: 10 },
+  },
+  'start-donation': {
+    kind: 'graphql',
+    operationName: 'StartDonation',
+    query: `mutation StartDonation($campaignId: ID!, $amount: Float!, $network: Network!, $token: StableToken) {
+  StartDonation(campaignId: $campaignId, amount: $amount, network: $network, token: $token) {
+    code
+    message
+    transaction {
+      txnid
+      amount
+      network
+      status
+      wallet { address }
+      campaignId
+    }
+  }
+}`,
+    fields: [
+      { key: 'campaignId', label: 'Campaign ID', type: 'string', valueType: 'ID!', required: true, placeholder: 'campaign-id', help: 'Donation campaign ID.' },
+      { key: 'amount', label: 'Amount', type: 'number', valueType: 'Float!', required: true, placeholder: '10', help: 'Donation amount.' },
+      { key: 'network', label: 'Network', type: 'string', valueType: 'Network!', required: true, placeholder: 'POLYGON', help: 'BEP20, POLYGON, BASE, or SOL.' },
+      { key: 'token', label: 'Token', type: 'string', valueType: 'StableToken', placeholder: 'USDT', help: 'USDT or USDC.' },
+    ],
+    responseFields: TRANSACTION_RESPONSE_FIELDS,
+    defaults: { campaignId: '', amount: 10, network: 'POLYGON', token: 'USDT' },
+  },
+  'get-txn-rest': {
+    kind: 'rest',
+    method: 'GET',
+    pathTemplate: '/txn/{txnid}',
+    fields: [TXNID_FIELD],
+    responseFields: TRANSACTION_RESPONSE_FIELDS,
+    defaults: { txnid: '' },
+  },
+  'get-donate-rest': {
+    kind: 'rest',
+    method: 'GET',
+    pathTemplate: '/donate/{campaignId}',
+    fields: [{
+      key: 'campaignId',
+      label: 'Campaign ID',
+      type: 'string',
+      valueType: 'ID!',
+      required: true,
+      placeholder: 'campaign-id',
+      help: 'Donation campaign identifier.',
+    }],
+    responseFields: [
+      ...COMMON_RESULT_FIELDS,
+      { path: 'donate.campaignId', valueType: 'ID', description: 'Campaign identifier.' },
+      { path: 'donate.raised', valueType: 'Float', description: 'Total raised.' },
+    ],
+    defaults: { campaignId: '' },
+  },
+  'start-donation-rest': {
+    kind: 'rest',
+    method: 'POST',
+    pathTemplate: '/donate/{campaignId}/pay',
+    fields: [
+      { key: 'campaignId', label: 'Campaign ID', type: 'string', valueType: 'ID!', required: true, placeholder: 'campaign-id', help: 'Path parameter.' },
+      { key: 'amount', label: 'Amount', type: 'number', valueType: 'Float!', required: true, placeholder: '10', help: 'Donation amount.' },
+      { key: 'network', label: 'Network', type: 'string', valueType: 'String!', required: true, placeholder: 'polygon', help: 'Network string.' },
+      { key: 'token', label: 'Token', type: 'string', valueType: 'String', placeholder: 'USDT', help: 'USDT or USDC.' },
+    ],
+    responseFields: TRANSACTION_RESPONSE_FIELDS,
+    defaults: { campaignId: '', amount: 10, network: 'polygon', token: 'USDT' },
   },
 }
 

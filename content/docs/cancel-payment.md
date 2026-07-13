@@ -42,5 +42,5 @@ mutation CancelPayment($txnid: String!) {
 
 ## REST equivalent
 
-See [Cancel payment](/cancel-payment-rest) (`POST /cancel-payment`).
+Cancels a payment that is not already finalized. **GraphQL-only** in v2 (no `POST /cancel-payment` REST route).
 
