@@ -36,4 +36,4 @@ docker run --rm -p 3002:3002 \
 
 ## Production
 
-Deployed on the VPS via `/root/docker-compose.yml` as the `argonpay-docs` service, routed by Traefik to `docs.argonpay.app`.
+Deployed on the VPS via `/root/Argon/docker-compose.yml` as the `argonpay-docs` service, routed by Traefik to `docs.argonpay.app`.
