@@ -2699,6 +2699,180 @@ html[data-theme="dark"] .docs-page {
   gap: 14px;
 }
 
+.docs-webhook {
+  margin: 48px 0 0;
+  padding: 24px;
+  border: 1px solid var(--docs-border);
+  border-radius: 14px;
+  background: var(--docs-try-gradient);
+}
+
+.docs-webhook.is-compact {
+  margin-top: 32px;
+}
+
+.docs-webhook-head {
+  margin-bottom: 20px;
+}
+
+.docs-webhook-eyebrow {
+  margin: 0 0 8px;
+  color: var(--docs-text-subtle);
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.docs-webhook-head h2 {
+  margin: 0 0 8px;
+  color: var(--docs-text);
+  font-family: 'Clash Display', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.docs-webhook-copy {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--docs-text-muted);
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.docs-webhook-copy code {
+  font-family: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.docs-webhook-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 20px;
+}
+
+.docs-webhook-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.docs-webhook-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: 'Sora', sans-serif;
+}
+
+.docs-webhook-field-wide {
+  grid-column: 1 / -1;
+}
+
+.docs-webhook-field-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--docs-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.docs-webhook-field input,
+.docs-webhook-field select {
+  width: 100%;
+  border: 1px solid var(--docs-border);
+  border-radius: 8px;
+  background: var(--docs-surface);
+  color: var(--docs-text);
+  padding: 11px 12px;
+  font-family: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  outline: none;
+}
+
+.docs-webhook-field input:focus,
+.docs-webhook-field select:focus {
+  border-color: var(--docs-accent);
+  box-shadow: 0 0 0 3px rgba(49, 7, 76, 0.08);
+}
+
+.docs-webhook-field small {
+  color: var(--docs-text-subtle);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.docs-webhook-field small code {
+  font-family: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+.docs-webhook-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.docs-webhook-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.docs-webhook-preview-head strong {
+  color: var(--docs-text);
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.docs-webhook-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.docs-webhook-copy-btn {
+  appearance: none;
+  border: 1px solid var(--docs-border);
+  background: var(--docs-bg);
+  color: var(--docs-accent);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.docs-webhook-copy-btn:hover {
+  background: var(--docs-surface-tint);
+}
+
+.docs-webhook-result {
+  margin-top: 16px;
+}
+
+@media (max-width: 1100px) {
+  .docs-webhook-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .docs-webhook-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1100px) {
   .docs-body.is-split {
     grid-template-columns: 1fr;

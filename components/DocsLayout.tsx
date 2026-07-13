@@ -6,8 +6,16 @@ import DocsBrandHeader from './DocsBrandHeader'
 import DocsDesktopPriorityModal from './DocsDesktopPriorityModal'
 import DocsMarkdown from './DocsMarkdown'
 import DocsSidebar from './DocsSidebar'
+import DocsWebhookTester from './DocsWebhookTester'
 import { DocsPage, DOCS_NAV, DOCS_PAGES } from '../utils/docsData'
 import { getDocsTryConfig } from '../utils/docsTryIt'
+
+const WEBHOOK_TESTER_SLUGS = new Set([
+  'webhook-testing',
+  'create-custodian-account',
+  'update-custodian-details',
+  'cancel-payment',
+])
 
 type DocsLayoutProps = {
   page: DocsPage
@@ -95,6 +103,10 @@ export default function DocsLayout({ page }: DocsLayoutProps) {
               <div className={`docs-body${isApiRef ? ' is-split' : ''}`}>
                 <div className="docs-content">
                   <DocsMarkdown content={page.markdown} />
+
+                  {WEBHOOK_TESTER_SLUGS.has(page.slug) ? (
+                    <DocsWebhookTester compact={page.slug !== 'webhook-testing'} />
+                  ) : null}
 
                   <nav className="docs-pager" aria-label="Docs pagination">
                     {prev ? (

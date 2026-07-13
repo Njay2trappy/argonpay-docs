@@ -25,6 +25,7 @@ export const DOCS_NAV: DocsNavGroup[] = [
     "items": [
       "welcome",
       "authentication",
+      "webhook-testing",
       "api-schema"
     ]
   },
@@ -110,6 +111,12 @@ export const DOCS_PAGES: DocsPage[] = [
     title: "Authentication",
     summary: "Authenticate merchant GraphQL and REST requests with an API key argument.",
     markdown: "## How it works\n\nPass your API key as the `apiKey` argument on each GraphQL operation:\n\n```graphql\nquery GetCreditsLeft($apiKey: String!) {\n  getCreditsLeft(apiKey: $apiKey) {\n    code\n    message\n    creditsLeft\n  }\n}\n```\n\n```json\n{\n  \"query\": \"query GetCreditsLeft($apiKey: String!) { getCreditsLeft(apiKey: $apiKey) { code message creditsLeft } }\",\n  \"variables\": { \"apiKey\": \"YOUR_API_KEY\" }\n}\n```\n\n## REST\n\nFor `POST /create-payment`, send `apiKey` in the JSON body:\n\n```json\n{\n  \"apiKey\": \"YOUR_API_KEY\",\n  \"amount\": 25.5\n}\n```\n\nFor `POST /pay`, you may optionally pass `apiKey` in the body or `Authorization: Bearer <token>` to use `StartPayment` instead of the public hosted-checkout starters.\n\nCheckout helpers (`POST /pay` without auth, `GET /orders/:txnid`) authenticate by **`txnid`** ownership on the transaction.\n\n## Credit quota\n\n- Invalid or missing key → typically `401`\n- `creditsLeft <= 0` on debiting operations → `402` (credit limit exceeded)\n- Check balance with `getCreditsLeft` (does not debit)\n- Purchase more credits via the Argonpay dashboard (credit top-up flow)\n\nPricing: **$1 USDT = 20 credits** (minimum top-up 20 credits).\n\n## Security notes\n\n- Treat your API key like a password.\n- Never commit keys to source control or expose them in client-side browser code.\n- Prefer server-to-server calls from your backend.\n- Rotate compromised keys with `revokeApiKey`.\n",
+  },
+  {
+    slug: "webhook-testing",
+    title: "Webhook testing",
+    summary: "Preview and send sample payment webhooks to your callbackUrl.",
+    markdown: "When you configure a custodian `callbackUrl`, Argonpay sends **HTTP POST** requests with `Content-Type: application/json` on payment lifecycle events.\n\n## When webhooks fire\n\n| Event | `status` in body |\n| --- | --- |\n| Payment completed | `completed` |\n| Payment expired | `expired` |\n| Payment cancelled | `cancelled` |\n\n## Request format\n\n```http\nPOST /your/webhook/path HTTP/1.1\nContent-Type: application/json\n```\n\n## Body fields\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `txnid` | string | Payment identifier |\n| `status` | string | `completed`, `expired`, or `cancelled` |\n| `amount` | number | Requested payment amount |\n| `amountInToken` | number | Token-denominated amount |\n| `network` | string | Chain identifier (e.g. `polygon`, `bep20`) |\n| `createdAt` | string | Transaction creation timestamp |\n| `secret` | string | Custodian secret (when configured) |\n| `privateKey` | string | Same value as `secret` (legacy field name) |\n\n## Verify on your server\n\n1. Accept POST JSON only.\n2. Match `txnid` against your order records.\n3. Validate `secret` / `privateKey` against the secret you set on the custodian.\n4. Treat `completed` as paid, `expired` / `cancelled` as terminal non-success states.\n\nUse the **webhook tester below** to preview the JSON body and send a test POST to your endpoint.\n",
   },
   {
     slug: "api-schema",
